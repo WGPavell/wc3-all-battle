@@ -2639,24 +2639,238 @@ unitGroups = {
 
 upgrades = {
     {
+        code = 'Rhar',
+        units = {'hfoo', 'hgyr', 'hkni', 'hmtt'}
+    },
+    {
+        code = 'Rhme',
+        units = {'hfoo', 'hgry', 'hkni'}
+    },
+    {
+        code = 'Rhde',
+        units = {'hfoo'}
+    },
+    {
         code = 'Rhan',
-        units = {'hkni', 'hgry', 'hdhw'}
+        units = {'hgry', 'hkni'}
+    },
+    {
+        code = 'Rhla',
+        units = {'hgry', 'hmtm', 'hrif'}
+    },
+    {
+        code = 'Rhhb',
+        units = {'hgry'}
+    },
+    {
+        code = 'Rhra',
+        units = {'hgyr', 'hmtm', 'hmtt', 'hrif'}
+    },
+    {
+        code = 'Rhgb',
+        units = {'hgyr'}
+    },
+    {
+        code = 'Rhpt',
+        units = {'hmpr'}
+    },
+    {
+        code = 'Rhfl',
+        units = {'hmtm'}
+    },
+    {
+        code = 'Rhlh',
+        units = {'hpea'}
+    },
+    {
+        code = 'Rhri',
+        units = {'hrif'}
+    },
+    {
+        code = 'Rhst',
+        units = {'hsor'}
+    },
+    {
+        code = 'Roar',
+        units = {'ocat', 'ogru', 'ohun', 'orai', 'otau', 'owyv'}
+    },
+    {
+        code = 'Rora',
+        units = {'ocat', 'ohun', 'owyv'}
+    },
+    {
+        code = 'Rowd',
+        units = {'odoc'}
+    },
+    {
+        code = 'Rotr',
+        units = {'odoc', 'ohun'}
+    },
+    {
+        code = 'Rome',
+        units = {'ogru', 'orai', 'otau'}
+    },
+    {
+        code = 'Robs',
+        units = {'ogru'}
+    },
+    {
+        code = 'Ropg',
+        units = {'ogru', 'opeo', 'orai'}
+    },
+    {
+        code = 'Rwdm',
+        units = {'okod'}
+    },
+    {
+        code = 'Roen',
+        units = {'orai'}
+    },
+    {
+        code = 'Rost',
+        units = {'oshm'}
+    },
+    {
+        code = 'Rows',
+        units = {'otau'}
+    },
+    {
+        code = 'Rowt',
+        units = {'owyv'}
+    },
+    {
+        code = 'Rovs',
+        units = {'owyv'}
+    },
+    {
+        code = 'Reuv',
+        units = {'Edem', 'Ekee', 'Emoo', 'earc', 'ebal', 'echm', 'edoc', 'edot', 'edry', 'ehip', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Resm',
+        units = {'earc', 'ebal', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Rema',
+        units = {'earc', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Reib',
+        units = {'earc', 'ehpr'}
+    },
+    {
+        code = 'Remk',
+        units = {'earc', 'ehpr'}
+    },
+    {
+        code = 'Repb',
+        units = {'ebal'}
+    },
+    {
+        code = 'Resw',
+        units = {'echm', 'edry', 'ehip'}
+    },
+    {
+        code = 'Rerh',
+        units = {'echm', 'edry', 'ehip'}
+    },
+    {
+        code = 'Recb',
+        units = {'echm'}
+    },
+    {
+        code = 'Redc',
+        units = {'edoc'}
+    },
+    {
+        code = 'Redt',
+        units = {'edot'}
+    },
+    {
+        code = 'Resi',
+        units = {'edry'}
+    },
+    {
+        code = 'Reht',
+        units = {'ehip', 'ehpr'}
+    },
+    {
+        code = 'Resc',
+        units = {'esen'}
+    },
+    {
+        code = 'Remg',
+        units = {'esen'}
+    },
+    {
+        code = 'Ruar',
+        units = {'uabo', 'ugho'}
+    },
+    {
+        code = 'Rume',
+        units = {'uabo', 'ugho', 'umtw'}
+    },
+    {
+        code = 'Rupc',
+        units = {'uabo', 'umtw'}
+    },
+    {
+        code = 'Ruba',
+        units = {'uban'}
+    },
+    {
+        code = 'Rura',
+        units = {'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Rucr',
+        units = {'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Ruwb',
+        units = {'ucry'}
+    },
+    {
+        code = 'Rufb',
+        units = {'ufro'}
+    },
+    {
+        code = 'Rusf',
+        units = {'ugar'}
+    },
+    {
+        code = 'Rugf',
+        units = {'ugho'}
+    },
+    {
+        code = 'Ruac',
+        units = {'ugho'}
+    },
+    {
+        code = 'Rusl',
+        units = {'unec'}
+    },
+    {
+        code = 'Rune',
+        units = {'unec'}
     }
 }
 
 unitsUpgradesDependencies = {}
-for _, upgrade in ipairs(upgrades) do
-    for _, unit in ipairs(upgrade.units) do
-        if unitsUpgradesDependencies[unit] == nil then
-            unitsUpgradesDependencies[unit] = {}
-        end
-        table.insert(unitsUpgradesDependencies[unit], upgrade.code)
-    end
-end
-
 unitList = {}
 
 OnInit.map(function()
+    for _, upgrade in ipairs(upgrades) do
+        upgrade.name = GetAbilityName(FourCC(upgrade.code))
+        upgrade.icon = BlzGetAbilityIcon(FourCC(upgrade.code))
+        for _, unit in ipairs(upgrade.units) do
+            if unitsUpgradesDependencies[unit] == nil then
+                unitsUpgradesDependencies[unit] = {}
+            end
+            table.insert(unitsUpgradesDependencies[unit], upgrade.code)
+        end
+    end
+
     for _, group in ipairs(unitGroups) do
         local unitsData = {}
         for _, code in ipairs(group.unit_codes) do
@@ -2699,16 +2913,33 @@ end)
 --- DateTime: 22.03.2025 12:29
 ---
 
+FOOD_LIMIT = 100
+
 OnInit.map(function()
     FogEnable(false)
     FogMaskEnable(false)
-    local unit = CreateUnit(Player(0), FourCC('ugar'), 0, 0, 0)
-    debugPrintAny(dump(unitsUpgradesDependencies))
+    --local unit = CreateUnit(Player(0), FourCC('ugar'), 0, 0, 0)
+    --debugPrintAny(dump(upgrades))
 end)
 
+---@param unitData table
+---@param forPlayer player
+function CreateUnitStack(unitData, forPlayer)
+    local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
+    for _ = 1, unitsTotal, 1 do
+        CreateUnit(forPlayer, FourCC(unitData.code), 0, 0, 0)
+        if unitsUpgradesDependencies[unitData.code] ~= nil then
+            for _, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
+                SetPlayerTechResearched(forPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade)))
+            end
+        end
+    end
+end
+
 OnInit.final(function()
+    CreateUnitStack(unitList[1].units[3], Player(0))
     for _, raceData in ipairs(unitList) do
-        debugPrint(raceData.units[1].icon)
+        --debugPrint(raceData.units[1].icon)
     end
 end)
 --CUSTOM_CODE
@@ -2720,7 +2951,7 @@ return true
 end
 
 function Trig_Untitled_Trigger_001_Actions()
-DisplayTextToForce(GetPlayersAll(), I2S(BlzGetUnitIntegerField(GetTriggerUnit(), UNIT_IF_TARGETED_AS)))
+DisplayTextToForce(GetPlayersAll(), BlzGetAbilityStringField(BlzGetUnitAbility(GetLastCreatedUnit(), FourCC("ANav")), ABILITY_SF_NAME))
 end
 
 function InitTrig_Untitled_Trigger_001()
@@ -2737,12 +2968,32 @@ function InitCustomPlayerSlots()
 SetPlayerStartLocation(Player(0), 0)
 SetPlayerColor(Player(0), ConvertPlayerColor(0))
 SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
-SetPlayerRaceSelectable(Player(0), true)
+SetPlayerRaceSelectable(Player(0), false)
 SetPlayerController(Player(0), MAP_CONTROL_USER)
+SetPlayerStartLocation(Player(1), 1)
+SetPlayerColor(Player(1), ConvertPlayerColor(1))
+SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
+SetPlayerRaceSelectable(Player(1), true)
+SetPlayerController(Player(1), MAP_CONTROL_COMPUTER)
+SetPlayerStartLocation(Player(2), 2)
+SetPlayerColor(Player(2), ConvertPlayerColor(2))
+SetPlayerRacePreference(Player(2), RACE_PREF_RANDOM)
+SetPlayerRaceSelectable(Player(2), true)
+SetPlayerController(Player(2), MAP_CONTROL_COMPUTER)
 end
 
 function InitCustomTeams()
 SetPlayerTeam(Player(0), 0)
+SetPlayerTeam(Player(1), 1)
+SetPlayerTeam(Player(2), 1)
+end
+
+function InitAllyPriorities()
+SetStartLocPrioCount(1, 1)
+SetEnemyStartLocPrioCount(1, 2)
+SetEnemyStartLocPrio(1, 0, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(2, 2)
+SetEnemyStartLocPrio(2, 0, 1, MAP_LOC_PRIO_LOW)
 end
 
 function main()
@@ -2760,12 +3011,14 @@ end
 function config()
 SetMapName("TRIGSTR_003")
 SetMapDescription("TRIGSTR_005")
-SetPlayers(1)
-SetTeams(1)
+SetPlayers(3)
+SetTeams(3)
 SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
 DefineStartLocation(0, -832.0, -1216.0)
+DefineStartLocation(1, 1779.1, -980.5)
+DefineStartLocation(2, -2059.2, -1191.4)
 InitCustomPlayerSlots()
-SetPlayerSlotAvailable(Player(0), MAP_CONTROL_USER)
-InitGenericPlayerSlots()
+InitCustomTeams()
+InitAllyPriorities()
 end
 

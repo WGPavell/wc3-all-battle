@@ -1,14 +1,4 @@
-﻿STRING 1
-{
-Player 1
-}
-
-STRING 2
-{
-Force 1
-}
-
-STRING 3
+﻿STRING 3
 {
 All Battle
 }
@@ -26,5 +16,25 @@ Nondescript
 STRING 6
 {
 Unknown
+}
+
+STRING 7
+{
+Player
+}
+
+STRING 8
+{
+Left Side
+}
+
+STRING 9
+{
+Right Side
+}
+
+STRING 10
+{
+Sides
 }
 

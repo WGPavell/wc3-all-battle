@@ -4,15 +4,32 @@
 --- DateTime: 22.03.2025 12:29
 ---
 
+FOOD_LIMIT = 100
+
 OnInit.map(function()
     FogEnable(false)
     FogMaskEnable(false)
-    local unit = CreateUnit(Player(0), FourCC('ugar'), 0, 0, 0)
-    debugPrintAny(dump(unitsUpgradesDependencies))
+    --local unit = CreateUnit(Player(0), FourCC('ugar'), 0, 0, 0)
+    --debugPrintAny(dump(upgrades))
 end)
 
+---@param unitData table
+---@param forPlayer player
+function CreateUnitStack(unitData, forPlayer)
+    local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
+    for _ = 1, unitsTotal, 1 do
+        CreateUnit(forPlayer, FourCC(unitData.code), 0, 0, 0)
+        if unitsUpgradesDependencies[unitData.code] ~= nil then
+            for _, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
+                SetPlayerTechResearched(forPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade)))
+            end
+        end
+    end
+end
+
 OnInit.final(function()
+    CreateUnitStack(unitList[1].units[3], Player(0))
     for _, raceData in ipairs(unitList) do
-        debugPrint(raceData.units[1].icon)
+        --debugPrint(raceData.units[1].icon)
     end
 end)

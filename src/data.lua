@@ -67,36 +67,238 @@ unitGroups = {
 
 upgrades = {
     {
-        code = 'Rhan',
-        units = {'hkni', 'hgry', 'hdhw'}
+        code = 'Rhar',
+        units = {'hfoo', 'hgyr', 'hkni', 'hmtt'}
     },
     {
-        code = 'Rhpm',
-        units = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt'}
+        code = 'Rhme',
+        units = {'hfoo', 'hgry', 'hkni'}
+    },
+    {
+        code = 'Rhde',
+        units = {'hfoo'}
+    },
+    {
+        code = 'Rhan',
+        units = {'hgry', 'hkni'}
+    },
+    {
+        code = 'Rhla',
+        units = {'hgry', 'hmtm', 'hrif'}
+    },
+    {
+        code = 'Rhhb',
+        units = {'hgry'}
+    },
+    {
+        code = 'Rhra',
+        units = {'hgyr', 'hmtm', 'hmtt', 'hrif'}
+    },
+    {
+        code = 'Rhgb',
+        units = {'hgyr'}
+    },
+    {
+        code = 'Rhpt',
+        units = {'hmpr'}
+    },
+    {
+        code = 'Rhfl',
+        units = {'hmtm'}
     },
     {
         code = 'Rhlh',
         units = {'hpea'}
     },
     {
-        code = 'Rguv',
-        units = {}
+        code = 'Rhri',
+        units = {'hrif'}
+    },
+    {
+        code = 'Rhst',
+        units = {'hsor'}
+    },
+    {
+        code = 'Roar',
+        units = {'ocat', 'ogru', 'ohun', 'orai', 'otau', 'owyv'}
+    },
+    {
+        code = 'Rora',
+        units = {'ocat', 'ohun', 'owyv'}
+    },
+    {
+        code = 'Rowd',
+        units = {'odoc'}
+    },
+    {
+        code = 'Rotr',
+        units = {'odoc', 'ohun'}
+    },
+    {
+        code = 'Rome',
+        units = {'ogru', 'orai', 'otau'}
+    },
+    {
+        code = 'Robs',
+        units = {'ogru'}
+    },
+    {
+        code = 'Ropg',
+        units = {'ogru', 'opeo', 'orai'}
+    },
+    {
+        code = 'Rwdm',
+        units = {'okod'}
+    },
+    {
+        code = 'Roen',
+        units = {'orai'}
+    },
+    {
+        code = 'Rost',
+        units = {'oshm'}
+    },
+    {
+        code = 'Rows',
+        units = {'otau'}
+    },
+    {
+        code = 'Rowt',
+        units = {'owyv'}
+    },
+    {
+        code = 'Rovs',
+        units = {'owyv'}
+    },
+    {
+        code = 'Reuv',
+        units = {'Edem', 'Ekee', 'Emoo', 'earc', 'ebal', 'echm', 'edoc', 'edot', 'edry', 'ehip', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Resm',
+        units = {'earc', 'ebal', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Rema',
+        units = {'earc', 'ehpr', 'esen'}
+    },
+    {
+        code = 'Reib',
+        units = {'earc', 'ehpr'}
+    },
+    {
+        code = 'Remk',
+        units = {'earc', 'ehpr'}
+    },
+    {
+        code = 'Repb',
+        units = {'ebal'}
+    },
+    {
+        code = 'Resw',
+        units = {'echm', 'edry', 'ehip'}
+    },
+    {
+        code = 'Rerh',
+        units = {'echm', 'edry', 'ehip'}
+    },
+    {
+        code = 'Recb',
+        units = {'echm'}
+    },
+    {
+        code = 'Redc',
+        units = {'edoc'}
+    },
+    {
+        code = 'Redt',
+        units = {'edot'}
+    },
+    {
+        code = 'Resi',
+        units = {'edry'}
+    },
+    {
+        code = 'Reht',
+        units = {'ehip', 'ehpr'}
+    },
+    {
+        code = 'Resc',
+        units = {'esen'}
+    },
+    {
+        code = 'Remg',
+        units = {'esen'}
+    },
+    {
+        code = 'Ruar',
+        units = {'uabo', 'ugho'}
+    },
+    {
+        code = 'Rume',
+        units = {'uabo', 'ugho', 'umtw'}
+    },
+    {
+        code = 'Rupc',
+        units = {'uabo', 'umtw'}
+    },
+    {
+        code = 'Ruba',
+        units = {'uban'}
+    },
+    {
+        code = 'Rura',
+        units = {'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Rucr',
+        units = {'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Ruwb',
+        units = {'ucry'}
+    },
+    {
+        code = 'Rufb',
+        units = {'ufro'}
+    },
+    {
+        code = 'Rusf',
+        units = {'ugar'}
+    },
+    {
+        code = 'Rugf',
+        units = {'ugho'}
+    },
+    {
+        code = 'Ruac',
+        units = {'ugho'}
+    },
+    {
+        code = 'Rusl',
+        units = {'unec'}
+    },
+    {
+        code = 'Rune',
+        units = {'unec'}
     }
 }
 
 unitsUpgradesDependencies = {}
-for _, upgrade in ipairs(upgrades) do
-    for _, unit in ipairs(upgrade.units) do
-        if unitsUpgradesDependencies[unit] == nil then
-            unitsUpgradesDependencies[unit] = {}
-        end
-        table.insert(unitsUpgradesDependencies[unit], upgrade.code)
-    end
-end
-
 unitList = {}
 
 OnInit.map(function()
+    for _, upgrade in ipairs(upgrades) do
+        upgrade.name = GetAbilityName(FourCC(upgrade.code))
+        upgrade.icon = BlzGetAbilityIcon(FourCC(upgrade.code))
+        for _, unit in ipairs(upgrade.units) do
+            if unitsUpgradesDependencies[unit] == nil then
+                unitsUpgradesDependencies[unit] = {}
+            end
+            table.insert(unitsUpgradesDependencies[unit], upgrade.code)
+        end
+    end
+
     for _, group in ipairs(unitGroups) do
         local unitsData = {}
         for _, code in ipairs(group.unit_codes) do
