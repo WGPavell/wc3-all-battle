@@ -5,31 +5,269 @@
 ---
 
 FOOD_LIMIT = 100
+SPAWN_CENTER_DISTANCE = 1000
+SPAWN_RADIUS_WIDTH = 1000
+SPAWN_RADIUS_HEIGHT = 1500
+SPAWN_LEFT = 1
+SPAWN_RIGHT = 2
 
-OnInit.map(function()
-    FogEnable(false)
-    FogMaskEnable(false)
-    --local unit = CreateUnit(Player(0), FourCC('ugar'), 0, 0, 0)
-    --debugPrintAny(dump(upgrades))
-end)
+battleUnitsLeft = {
+    [SPAWN_LEFT] = 0,
+    [SPAWN_RIGHT] = 0
+}
+
+battleUnitDyingTrg = nil
+battleUnitsGroup = CreateGroup()
+sideGroups = {
+    [SPAWN_LEFT] = CreateGroup(),
+    [SPAWN_RIGHT] = CreateGroup()
+}
+
+leftSideSpawnData = {
+    raceIndex = 1,
+    unitIndex = 14
+}
+rightSideSpawnData = {
+    raceIndex = 4,
+    unitIndex = 13
+}
+
+function generateGridForSpawn(centerX, angle, unitsTotal)
+    local directionDiff = math.cos(math.rad(angle))
+    local left = (centerX - (SPAWN_RADIUS_WIDTH / 2)  * directionDiff)
+    local bottom = -SPAWN_RADIUS_HEIGHT / 2
+    --AddSpecialEffect("Abilities\\Spells\\Human\\DevotionAura\\DevotionAura.mdl", left, bottom)
+    --AddSpecialEffect("Abilities\\Spells\\Human\\DevotionAura\\DevotionAura.mdl", left, bottom + SPAWN_RADIUS_HEIGHT)
+    --AddSpecialEffect("Abilities\\Spells\\Human\\DevotionAura\\DevotionAura.mdl", left + SPAWN_RADIUS_WIDTH * directionDiff, bottom + SPAWN_RADIUS_HEIGHT)
+    --AddSpecialEffect("Abilities\\Spells\\Human\\DevotionAura\\DevotionAura.mdl", left + SPAWN_RADIUS_WIDTH * directionDiff, bottom)
+    local bestCols = math.floor(math.sqrt(unitsTotal))
+    if unitsTotal % bestCols ~= 0 then
+        bestCols = math.max(math.floor(math.sqrt(unitsTotal * SPAWN_RADIUS_WIDTH / SPAWN_RADIUS_HEIGHT)), 1)
+        while unitsTotal % bestCols ~= 0 do
+            bestCols = bestCols - 1
+        end
+    end
+    local bestRows = math.floor(unitsTotal / bestCols)
+    local dx = bestCols > 1 and SPAWN_RADIUS_WIDTH / (bestCols - 1) * directionDiff or 0
+    local dy = bestRows > 1 and SPAWN_RADIUS_HEIGHT / (bestRows - 1) or 0
+    local points = {}
+    for i = 1, bestRows do
+        local y = dy ~= 0 and bottom + (i - 1) * dy or 0
+        for j = 1, bestCols do
+            local x = dx ~= 0 and left + (j - 1) * dx or centerX
+            table.insert(points, {
+                x = x,
+                y = y
+            })
+        end
+    end
+    return points
+end
+
+unitsInBattle = {}
 
 ---@param unitData table
----@param forPlayer player
-function CreateUnitStack(unitData, forPlayer)
+---@param spawnSide number
+function CreateUnitStack(unitData, spawnSide)
+    local forPlayer = Player(spawnSide == SPAWN_LEFT and 1 or 2)
+    --local forPlayer = Player(0)
     local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
-    for _ = 1, unitsTotal, 1 do
-        CreateUnit(forPlayer, FourCC(unitData.code), 0, 0, 0)
+    battleUnitsLeft[spawnSide] = unitsTotal
+    --local unitsTotal = 1
+    local centerPointX = SPAWN_CENTER_DISTANCE * (spawnSide == SPAWN_LEFT and -1 or 1)
+    local spawnAngle = spawnSide == SPAWN_LEFT and 0 or 180
+    local gridPoints = generateGridForSpawn(centerPointX, spawnAngle, unitsTotal)
+    local spawnedUnits = {}
+    for _, point in ipairs(gridPoints) do
+        local unit = CreateUnit(forPlayer, FourCC(unitData.code), point.x, point.y, spawnAngle)
+        unitsInBattle[unit] = spawnSide
+        --RemoveGuardPosition(unit)
+        GroupAddUnit(battleUnitsGroup, unit)
+        GroupAddUnit(sideGroups[spawnSide], unit)
+        --SetWidgetLife(unit, 1)
+        TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
+        table.insert(spawnedUnits, unit)
         if unitsUpgradesDependencies[unitData.code] ~= nil then
             for _, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
                 SetPlayerTechResearched(forPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade)))
             end
         end
+        if unitData.is_hero then
+            SetHeroLevel(unit, 10, false)
+            if heroAbilities[unitData.code] ~= nil then
+                for _, ability in ipairs(heroAbilities[unitData.code]) do
+                    repeat
+                        local prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
+                        SelectHeroSkill(unit, FourCC(ability))
+                    until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
+                end
+            end
+        end
+        SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
+    return spawnedUnits
 end
 
-OnInit.final(function()
-    CreateUnitStack(unitList[1].units[3], Player(0))
-    for _, raceData in ipairs(unitList) do
-        --debugPrint(raceData.units[1].icon)
+function StartNewBattle()
+    PauseTimer(sideUnitsAttackRecycleTimer)
+    PauseTimer(centerCameraTimer)
+    ForGroup(battleUnitsGroup, function()
+        GroupRemoveUnit(battleUnitsGroup, GetEnumUnit())
+        RemoveUnit(GetEnumUnit())
+    end)
+    repeat
+        rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
+        repeat
+            --debugPrint("New iteration")
+            if unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex] == nil then
+--                debugPrint("No units left in race for right side, so switch to next race")
+                rightSideSpawnData.raceIndex = rightSideSpawnData.raceIndex + 1
+                rightSideSpawnData.unitIndex = 1
+                if unitList[rightSideSpawnData.raceIndex] == nil then
+--                    debugPrint("No units left for right side, so switch unit for left side")
+                    leftSideSpawnData.unitIndex = leftSideSpawnData.unitIndex + 1
+                    if unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex] == nil then
+--                        debugPrint("No units left in race for left side, so switch to next race")
+                        leftSideSpawnData.raceIndex = leftSideSpawnData.raceIndex + 1
+                        if unitList[leftSideSpawnData.raceIndex] == nil then
+--                            debugPrint("All battles done")
+                            return
+                        end
+                        leftSideSpawnData.unitIndex = 1
+                    end
+                    rightSideSpawnData.raceIndex = leftSideSpawnData.raceIndex
+                    rightSideSpawnData.unitIndex = leftSideSpawnData.unitIndex + 1
+                end
+            end
+        until unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex] ~= nil
+        --debugPrint("Left side - " .. leftSideSpawnData.raceIndex .. ":" .. leftSideSpawnData.unitIndex)
+        local leftUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+--        debugPrint("Right side - " .. rightSideSpawnData.raceIndex .. ":" .. rightSideSpawnData.unitIndex)
+        local rightUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
+--        debugPrint("Left side name " .. leftUnitData.name)
+--        debugPrint("Right side name " .. rightUnitData.name)
+        local leftCanAttackRight = (leftUnitData.attack_target.ground and rightUnitData.unit_target.ground) or (leftUnitData.attack_target.air and rightUnitData.unit_target.air)
+--        debugPrint(leftCanAttackRight and "Left can attack right" or "Left can't attack right")
+        local rightCanAttackLeft = (rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air)
+--        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
+    until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
+    local leftSideUnits = CreateUnitStack(unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex], SPAWN_LEFT)
+    local rightSideUnits = CreateUnitStack(unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex], SPAWN_RIGHT)
+    for _, unit in ipairs(leftSideUnits) do
+        IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
     end
+    for _, unit in ipairs(rightSideUnits) do
+        IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
+    end
+    TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
+    TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
+    CenterCameraOnGroups()
+end
+
+sideUnitsAttackRecycleTimer = CreateTimer()
+SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 5
+
+function IssueSideUnitsAttackRecycle()
+    for _, spawnSide in ipairs({SPAWN_LEFT, SPAWN_RIGHT}) do
+        ForGroup(sideGroups[spawnSide], function()
+            local unit = GetEnumUnit()
+            local targetUnit = GroupPickRandomUnit(sideGroups[spawnSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+            if targetUnit ~= nil then
+                IssuePointOrder(unit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
+            end
+        end)
+    end
+    TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
+end
+
+function BattleUnitDyingTrgAction()
+    local unit = GetDyingUnit()
+    local unitSide = unitsInBattle[unit]
+    if unitSide == nil then return end
+    GroupRemoveUnit(sideGroups[unitSide], unit)
+    battleUnitsLeft[unitSide] = battleUnitsLeft[unitSide] - 1
+    if battleUnitsLeft[unitSide] <= 0 then
+        StartNewBattle()
+    end
+    --debugPrint("Left on side " .. unitSide .. ": " .. battleUnitsLeft[unitSide])
+end
+
+centerCameraTimer = CreateTimer()
+CENTER_CAMERA_DURATION = 1
+
+function CenterCameraOnGroups()
+    local minX = 0
+    local maxX = 0
+    local minY = 0
+    local maxY = 0
+    local totalX = 0.0
+    local totalY = 0.0
+    local totalUnits = 0
+    for _, sideGroup in ipairs(sideGroups) do
+        ForGroup(sideGroup, function()
+            local unit = GetEnumUnit()
+            minX = math.min(minX, GetUnitX(unit))
+            maxX = math.max(maxX, GetUnitX(unit))
+            minY = math.min(minY, GetUnitY(unit))
+            maxY = math.max(maxY, GetUnitY(unit))
+            totalX = totalX + GetUnitX(unit)
+            totalY = totalY + GetUnitY(unit)
+            totalUnits = totalUnits + 1
+        end)
+    end
+    PanCameraToTimedWithZ(totalX / totalUnits, totalY / totalUnits, math.max(math.abs(maxX - minX), math.abs(maxY - minY)) / 5, CENTER_CAMERA_DURATION)
+end
+
+OnInit.map(function()
+    FogEnable(false)
+    FogMaskEnable(false)
+    SetCameraPosition(0, 0)
+    SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
+    SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
+    --BlzHideOriginFrames(true)
+    -- Frames
+    --debugPrintAny(BlzFrameGetName(BlzFrameGetParent(BlzGetFrameByName("ConsoleUI",0))))
+    --BlzFrameSetVisible(BlzGetFrameByName("ConsoleUIBackdrop",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("ConsoleUI",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("MiniMapFrame",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("CommandBarFrame",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("InfoPanelUnitDetail",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("SimpleBuildTimeIndicator",0), false)
+    --BlzFrameSetVisible(BlzGetFrameByName("SimpleBuildTimeIndicator",1), false)
+    --BlzFrameSetVisible(BlzGetOriginFrame(ORIGIN_FRAME_PORTRAIT, 0), false)
+    --local blademaster = BlzCreateFrame()
+    local simpleFrame = BlzCreateSimpleFrame("UpperButtonBarButtonTemplate", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), 0)
+    BlzFrameSetPoint(simpleFrame, FRAMEPOINT_TOPLEFT, BlzGetOriginFrame(ORIGIN_FRAME_HERO_BAR, 0), FRAMEPOINT_TOPLEFT, 0.1, -0.1)
+    local icon = BlzCreateFrameByType("SIMPLESTATUSBAR", "", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), "", 0)
+    BlzFrameClearAllPoints(icon)
+    BlzFrameSetPoint(icon, FRAMEPOINT_BOTTOM, simpleFrame, FRAMEPOINT_TOP, 0, 0.006)
+    BlzFrameSetSize(icon, 0.04, 0.04)
+    BlzFrameSetTexture(icon, "ReplaceableTextures\\CommandButtons\\BTNPriest", 0, false)
+    BlzFrameSetTooltip(simpleFrame, icon)
+    -- SimpleFrameTooltip is not hidden by calling BlzFrameSetTooltip, hide it
+    BlzFrameSetVisible(icon, false)
+    --BlzEnableUIAutoPosition(false)
+    --local frame = BlzCreateSimpleFrame("simple_test", BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), 0)
+    --local blademaster = BlzCreateFrameByType("BACKDROP", "Blademaster", frame, "", 0)
+    --BlzFrameSetAllPoints(blademaster, frame)
+    ----BlzFrameSetAlpha(BlzGetFrameByName("ConsoleUIBackdrop",0), 0)
+    ----BlzFrameSetAbsPoint(blademaster, FRAMEPOINT_TOPLEFT, -0.02, 0.1)
+    ----BlzFrameSetVisible(BlzGetOriginFrame(ORIGIN_FRAME_HERO_BAR, 0), true)
+    --BlzFrameSetPoint(frame, FRAMEPOINT_TOPLEFT, BlzGetOriginFrame(ORIGIN_FRAME_HERO_BAR, 0), FRAMEPOINT_TOPLEFT, 0.1, 0)
+    --BlzFrameSetSize(blademaster, 0.05, 0.05)
+    --BlzFrameSetTexture(blademaster, "ReplaceableTextures\\CommandButtons\\BTNHeroBlademaster.blp",0, true)
+    --local unit = CreateUnit(Player(0), FourCC('Hamg'), 0, 0, 0)
+    --SetHeroLevel(unit, 10, false)
+    --for _, ability in ipairs(heroAbilities['Hamg']) do
+    --    repeat
+    --        local prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
+    --        SelectHeroSkill(unit, FourCC(ability))
+    --    until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
+    --end
+    battleUnitDyingTrg = CreateTrigger()
+    TriggerAddAction(battleUnitDyingTrg, BattleUnitDyingTrgAction)
+end)
+
+OnInit.final(function()
+    StartNewBattle()
 end)

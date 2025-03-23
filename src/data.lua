@@ -67,24 +67,36 @@ unitGroups = {
 
 upgrades = {
     {
-        code = 'Rhar',
-        units = {'hfoo', 'hgyr', 'hkni', 'hmtt'}
+        code = 'Rhla',
+        units = {'hdhw', 'hgry', 'hmtm', 'hrif'}
     },
     {
         code = 'Rhme',
-        units = {'hfoo', 'hgry', 'hkni'}
+        units = {'hdhw', 'hfoo', 'hgry', 'hkni', 'hspt'}
+    },
+    {
+        code = 'Rguv',
+        units = {'hdhw', 'hfoo', 'hgry', 'hgyr', 'hkni', 'hmpr', 'hmtm', 'hmtt', 'hpea', 'hrif', 'hsor', 'hspt', 'ocat', 'odoc', 'ogru', 'ohun', 'okod', 'opeo', 'orai', 'oshm', 'ospw', 'otau', 'otbr', 'owyv', 'uabo', 'uaco', 'uban', 'ucry', 'ufro', 'ugar', 'ugho', 'umtw', 'unec', 'uobs'}
+    },
+    {
+        code = 'Rhan',
+        units = {'hdhw', 'hgry', 'hkni'}
+    },
+    {
+        code = 'Rhcd',
+        units = {'hdhw'}
+    },
+    {
+        code = 'Rhar',
+        units = {'hfoo', 'hgyr', 'hkni', 'hmtt', 'hspt'}
     },
     {
         code = 'Rhde',
         units = {'hfoo'}
     },
     {
-        code = 'Rhan',
-        units = {'hgry', 'hkni'}
-    },
-    {
-        code = 'Rhla',
-        units = {'hgry', 'hmtm', 'hrif'}
+        code = 'Rhpm',
+        units = {'hfoo', 'hkni', 'hmpr', 'hrif', 'hsor', 'hspt'}
     },
     {
         code = 'Rhhb',
@@ -99,12 +111,28 @@ upgrades = {
         units = {'hgyr'}
     },
     {
+        code = 'Rhfc',
+        units = {'hgyr'}
+    },
+    {
+        code = 'Rhsb',
+        units = {'hkni'}
+    },
+    {
         code = 'Rhpt',
         units = {'hmpr'}
     },
     {
         code = 'Rhfl',
         units = {'hmtm'}
+    },
+    {
+        code = 'Rhfs',
+        units = {'hmtm'}
+    },
+    {
+        code = 'Rhrt',
+        units = {'hmtt'}
     },
     {
         code = 'Rhlh',
@@ -119,12 +147,24 @@ upgrades = {
         units = {'hsor'}
     },
     {
+        code = 'Rhss',
+        units = {'hspt'}
+    },
+    {
         code = 'Roar',
-        units = {'ocat', 'ogru', 'ohun', 'orai', 'otau', 'owyv'}
+        units = {'ocat', 'ogru', 'ohun', 'orai', 'otau', 'otbr', 'owyv'}
     },
     {
         code = 'Rora',
-        units = {'ocat', 'ohun', 'owyv'}
+        units = {'ocat', 'ohun', 'otbr', 'owyv'}
+    },
+    {
+        code = 'Robf',
+        units = {'ocat'}
+    },
+    {
+        code = 'Rolf',
+        units = {'ocat'}
     },
     {
         code = 'Rowd',
@@ -132,7 +172,11 @@ upgrades = {
     },
     {
         code = 'Rotr',
-        units = {'odoc', 'ohun'}
+        units = {'odoc', 'ohun', 'otbr'}
+    },
+    {
+        code = 'Ropm',
+        units = {'odoc', 'ogru', 'ohun', 'orai', 'oshm', 'ospw', 'otau'}
     },
     {
         code = 'Rome',
@@ -147,6 +191,10 @@ upgrades = {
         units = {'ogru', 'opeo', 'orai'}
     },
     {
+        code = 'Robk',
+        units = {'ohun'}
+    },
+    {
         code = 'Rwdm',
         units = {'okod'}
     },
@@ -159,12 +207,12 @@ upgrades = {
         units = {'oshm'}
     },
     {
-        code = 'Rows',
-        units = {'otau'}
+        code = 'Rowt',
+        units = {'ospw'}
     },
     {
-        code = 'Rowt',
-        units = {'owyv'}
+        code = 'Rows',
+        units = {'otau'}
     },
     {
         code = 'Rovs',
@@ -172,7 +220,7 @@ upgrades = {
     },
     {
         code = 'Reuv',
-        units = {'Edem', 'Ekee', 'Emoo', 'earc', 'ebal', 'echm', 'edoc', 'edot', 'edry', 'ehip', 'ehpr', 'esen'}
+        units = {'Edem', 'Ekee', 'Emoo', 'Ewar', 'earc', 'ebal', 'echm', 'edoc', 'edot', 'edry', 'efdr', 'ehip', 'ehpr', 'emtg', 'esen'}
     },
     {
         code = 'Resm',
@@ -191,16 +239,20 @@ upgrades = {
         units = {'earc', 'ehpr'}
     },
     {
+        code = 'Repm',
+        units = {'earc', 'edoc', 'edot', 'edry', 'emtg', 'esen'}
+    },
+    {
         code = 'Repb',
         units = {'ebal'}
     },
     {
         code = 'Resw',
-        units = {'echm', 'edry', 'ehip'}
+        units = {'echm', 'edry', 'efdr', 'ehip', 'emtg'}
     },
     {
         code = 'Rerh',
-        units = {'echm', 'edry', 'ehip'}
+        units = {'echm', 'edry', 'efdr', 'ehip', 'emtg'}
     },
     {
         code = 'Recb',
@@ -211,7 +263,15 @@ upgrades = {
         units = {'edoc'}
     },
     {
+        code = 'Reeb',
+        units = {'edoc'}
+    },
+    {
         code = 'Redt',
+        units = {'edot'}
+    },
+    {
+        code = 'Reec',
         units = {'edot'}
     },
     {
@@ -221,6 +281,14 @@ upgrades = {
     {
         code = 'Reht',
         units = {'ehip', 'ehpr'}
+    },
+    {
+        code = 'Rers',
+        units = {'emtg'}
+    },
+    {
+        code = 'Rehs',
+        units = {'emtg'}
     },
     {
         code = 'Resc',
@@ -243,6 +311,14 @@ upgrades = {
         units = {'uabo', 'umtw'}
     },
     {
+        code = 'Rupm',
+        units = {'uabo', 'uban', 'ucry', 'ugho', 'unec'}
+    },
+    {
+        code = 'Ruac',
+        units = {'uabo', 'ugho'}
+    },
+    {
         code = 'Ruba',
         units = {'uban'}
     },
@@ -259,6 +335,10 @@ upgrades = {
         units = {'ucry'}
     },
     {
+        code = 'Rubu',
+        units = {'ucry'}
+    },
+    {
         code = 'Rufb',
         units = {'ufro'}
     },
@@ -271,17 +351,36 @@ upgrades = {
         units = {'ugho'}
     },
     {
-        code = 'Ruac',
-        units = {'ugho'}
-    },
-    {
-        code = 'Rusl',
-        units = {'unec'}
-    },
-    {
         code = 'Rune',
         units = {'unec'}
+    },
+    {
+        code = 'Rusm',
+        units = {'unec'}
+    },
+    {
+        code = 'Rusp',
+        units = {'uobs'}
     }
+}
+
+heroAbilities = {
+    Hamg = {'AHbz', 'AHab', 'AHwe', 'AHmt'},
+    Hblm = {'AHfs', 'AHbn', 'AHdr', 'AHpx'},
+    Hmkg = {'AHtc', 'AHtb', 'AHbh', 'AHav'},
+    Hpal = {'AHhb', 'AHds', 'AHre', 'AHad'},
+    Obla = {'AOwk', 'AOcr', 'AOmi', 'AOww'},
+    Ofar = {'AOfs', 'AOsf', 'AOcl', 'AOeq'},
+    Oshd = {'AOhw', 'AOhx', 'AOsw', 'AOvd'},
+    Otch = {'AOsh', 'AOae', 'AOre', 'AOws'},
+    Edem = {'AEmb', 'AEim', 'AEev', 'AEme'},
+    Ekee = {'AEer', 'AEfn', 'AEah', 'AEtq'},
+    Emoo = {'AHfa', 'AEst', 'AEar', 'AEsf'},
+    Ewar = {'AEbl', 'AEfk', 'AEsh', 'AEsv'},
+    Ucrl = {'AUim', 'AUts', 'AUcb', 'AUls'},
+    Udea = {'AUdc', 'AUdp', 'AUau', 'AUan'},
+    Udre = {'AUav', 'AUsl', 'AUcs', 'AUin'},
+    Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'}
 }
 
 unitsUpgradesDependencies = {}
@@ -299,10 +398,16 @@ OnInit.map(function()
         end
     end
 
+    local subjectPlayer = Player(PLAYER_NEUTRAL_PASSIVE)
     for _, group in ipairs(unitGroups) do
         local unitsData = {}
         for _, code in ipairs(group.unit_codes) do
-            local subject = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC(code), 0, 0, 0)
+            local subject = CreateUnit(subjectPlayer, FourCC(code), 0, 0, 0)
+            if unitsUpgradesDependencies[code] ~= nil then
+                for _, upgrade in ipairs(unitsUpgradesDependencies[code]) do
+                    SetPlayerTechResearched(subjectPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade)))
+                end
+            end
             local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)
             local attack1_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 0)
             local attack1_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0)

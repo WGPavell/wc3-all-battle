@@ -1,40 +1,20 @@
-﻿STRING 3
+﻿STRING 1
 {
-All Battle
+Наблюдатель
+}
+
+STRING 2
+{
+Левая сторона
+}
+
+STRING 3
+{
+Правая сторона
 }
 
 STRING 4
 {
-Any
-}
-
-STRING 5
-{
-Nondescript
-}
-
-STRING 6
-{
-Unknown
-}
-
-STRING 7
-{
-Player
-}
-
-STRING 8
-{
-Left Side
-}
-
-STRING 9
-{
-Right Side
-}
-
-STRING 10
-{
-Sides
+Борцы
 }
 
