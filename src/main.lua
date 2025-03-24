@@ -32,6 +32,8 @@ rightSideSpawnData = {
     unitIndex = 13
 }
 
+sideFrames = nil
+
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
     local left = (centerX - (SPAWN_RADIUS_WIDTH / 2)  * directionDiff)
@@ -74,6 +76,10 @@ function CreateUnitStack(unitData, spawnSide)
     local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
     battleUnitsLeft[spawnSide] = unitsTotal
     --local unitsTotal = 1
+
+    sideFrames[spawnSide].icon:setTexture(unitData.icon)
+    sideFrames[spawnSide].text:setText(tostring(unitsTotal))
+
     local centerPointX = SPAWN_CENTER_DISTANCE * (spawnSide == SPAWN_LEFT and -1 or 1)
     local spawnAngle = spawnSide == SPAWN_LEFT and 0 or 180
     local gridPoints = generateGridForSpawn(centerPointX, spawnAngle, unitsTotal)
@@ -111,10 +117,19 @@ end
 function StartNewBattle()
     PauseTimer(sideUnitsAttackRecycleTimer)
     PauseTimer(centerCameraTimer)
+
     ForGroup(battleUnitsGroup, function()
         GroupRemoveUnit(battleUnitsGroup, GetEnumUnit())
         RemoveUnit(GetEnumUnit())
     end)
+    local leftUnitsGroup = CreateGroup()
+    GroupEnumUnitsInRect(leftUnitsGroup, GetPlayableMapRect(), nil)
+    ForGroup(leftUnitsGroup, function()
+        RemoveUnit(GetEnumUnit())
+    end)
+    GroupClear(leftUnitsGroup)
+    DestroyGroup(leftUnitsGroup)
+
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
         repeat
@@ -151,6 +166,7 @@ function StartNewBattle()
         local rightCanAttackLeft = (rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air)
 --        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
     until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
+
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
@@ -161,10 +177,10 @@ function StartNewBattle()
     for _, unit in ipairs(rightSideUnits) do
         IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
     end
-    leftSideFrame:setTexture(leftSideUnitData.icon)
-    rightSideFrame:setTexture(rightSideUnitData.icon)
+
     TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
     TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
+
     CenterCameraOnGroups()
 end
 
@@ -190,6 +206,7 @@ function BattleUnitDyingTrgAction()
     if unitSide == nil then return end
     GroupRemoveUnit(sideGroups[unitSide], unit)
     battleUnitsLeft[unitSide] = battleUnitsLeft[unitSide] - 1
+    sideFrames[unitSide].text:setText(tostring(battleUnitsLeft[unitSide]))
     if battleUnitsLeft[unitSide] <= 0 then
         StartNewBattle()
     end
@@ -230,6 +247,16 @@ OnInit.map(function()
     SuspendTimeOfDay(true)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
+    sideFrames = {
+        [SPAWN_LEFT] = {
+            icon = leftSideIconFrame,
+            text = leftSideTextFrame
+        },
+        [SPAWN_RIGHT] = {
+            icon = rightSideIconFrame,
+            text = rightSideTextFrame
+        }
+    }
     --local unit = CreateUnit(Player(0), FourCC('Hamg'), 0, 0, 0)
     --SetHeroLevel(unit, 10, false)
     --for _, ability in ipairs(heroAbilities['Hamg']) do
