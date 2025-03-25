@@ -394,7 +394,7 @@ OnInit.map(function()
             if unitsUpgradesDependencies[unit] == nil then
                 unitsUpgradesDependencies[unit] = {}
             end
-            table.insert(unitsUpgradesDependencies[unit], upgrade.code)
+            table.insert(unitsUpgradesDependencies[unit], upgrade)
         end
     end
 
@@ -405,7 +405,7 @@ OnInit.map(function()
             local subject = CreateUnit(subjectPlayer, FourCC(code), 0, 0, 0)
             if unitsUpgradesDependencies[code] ~= nil then
                 for _, upgrade in ipairs(unitsUpgradesDependencies[code]) do
-                    SetPlayerTechResearched(subjectPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade)))
+                    SetPlayerTechResearched(subjectPlayer, FourCC(upgrade.code), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade.code)))
                 end
             end
             local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)

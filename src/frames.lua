@@ -58,6 +58,9 @@ OnInit.map(function()
     leftSideTextFrame = SimpleTextFrame:new("left_side_text", "0", 2, fullscreenWrapperFrame.handle)
     leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
 
+    --local upgradeIconFrame = TextureFrame:new("upgrade_icon_frame", "", fullscreenWrapperFrame.handle)
+    --upgradeIconFrame.cover:setSize(0.03, 0.03):setRelativePoint(FRAMEPOINT_TOPLEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+
     rightSideIconFrame = TextureFrame:new("right_side_icon", "", fullscreenWrapperFrame.handle)
     rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
     rightSideTextFrame = SimpleTextFrame:new("right_side_text", "0", 2, fullscreenWrapperFrame.handle)
@@ -83,7 +86,7 @@ upgradeFrames = {
 function ClearUpgradeFrames()
     for _, sideUpgradeFrames in ipairs(upgradeFrames) do
         ---@param upgradeFrame SimpleTypeFrame
-        for _, upgradeFrame in ipairs(sideUpgradeFrames.frame) do
+        for _, upgradeFrame in ipairs(sideUpgradeFrames.frames) do
             upgradeFrame:setVisible(false)
         end
         sideUpgradeFrames.visible_total = 0
@@ -91,11 +94,22 @@ function ClearUpgradeFrames()
 end
 
 function AppendUpgradeFrame(side)
-    local parentFrame = side == SIDE_FRAME_LEFT and leftSideIconFrame or rightSideIconFrame
-    local containerFrame = upgradeFrames[side][upgradeFrames[side].visible_total + 1]
-    if (containerFrame == nil) then
-        containerFrame = SimpleEmptyFrame:new("upgrade_frame_container", parentFrame, upgradeFrames[side].visible_total)
-        -- TODO
-        upgradeFrames[side][upgradeFrames[side].visible_total + 1] = containerFrame
+    local frameIndex = upgradeFrames[side].visible_total + 1
+    ---@type UpgradeDataFrame
+    local upgradeFrame = upgradeFrames[side].frames[frameIndex]
+    if (upgradeFrame == nil) then
+        upgradeFrame = UpgradeDataFrame:new("upgrade_frame_container", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
+        upgradeFrame:setSize(0.034, 0.0225)
+        upgradeFrames[side].frames[frameIndex] = upgradeFrame
+        if frameIndex == 1 then
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_TOPLEFT or FRAMEPOINT_TOPRIGHT, side == SIDE_FRAME_LEFT and leftSideIconFrame.cover.handle or rightSideIconFrame.cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_BOTTOMLEFT or FRAMEPOINT_BOTTOMRIGHT, 0, -0.015)
+        elseif (frameIndex - 1) % 4 == 0 then
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_TOPLEFT or FRAMEPOINT_TOPRIGHT, upgradeFrames[side].frames[frameIndex - 4].cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_BOTTOMLEFT or FRAMEPOINT_BOTTOMRIGHT, 0, -0.003)
+        else
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_LEFT or FRAMEPOINT_RIGHT, upgradeFrames[side].frames[frameIndex - 1].cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_RIGHT or FRAMEPOINT_LEFT, side == SIDE_FRAME_LEFT and 0.001 or -0.001, 0)
+        end
+    else
+        upgradeFrame:setVisible(true)
     end
+    upgradeFrames[side].visible_total = frameIndex
 end

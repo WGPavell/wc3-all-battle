@@ -25,7 +25,7 @@ sideGroups = {
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 14
+    unitIndex = 2
 }
 rightSideSpawnData = {
     raceIndex = 4,
@@ -80,6 +80,17 @@ function CreateUnitStack(unitData, spawnSide)
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
 
+
+    if unitsUpgradesDependencies[unitData.code] ~= nil then
+        for index, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
+            local upgradeLevel = GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade.code))
+            SetPlayerTechResearched(forPlayer, FourCC(upgrade.code), upgradeLevel)
+            AppendUpgradeFrame(spawnSide)
+            upgradeFrames[spawnSide].frames[index]:setIconPath(upgrade.icon)
+            upgradeFrames[spawnSide].frames[index]:setText(upgradeLevel)
+        end
+    end
+
     local centerPointX = SPAWN_CENTER_DISTANCE * (spawnSide == SPAWN_LEFT and -1 or 1)
     local spawnAngle = spawnSide == SPAWN_LEFT and 0 or 180
     local gridPoints = generateGridForSpawn(centerPointX, spawnAngle, unitsTotal)
@@ -90,14 +101,9 @@ function CreateUnitStack(unitData, spawnSide)
         --RemoveGuardPosition(unit)
         GroupAddUnit(battleUnitsGroup, unit)
         GroupAddUnit(sideGroups[spawnSide], unit)
-        --SetWidgetLife(unit, 1)
+        SetWidgetLife(unit, 1)
         TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
         table.insert(spawnedUnits, unit)
-        if unitsUpgradesDependencies[unitData.code] ~= nil then
-            for _, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
-                SetPlayerTechResearched(forPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade)))
-            end
-        end
         if unitData.is_hero then
             SetHeroLevel(unit, 10, false)
             if heroAbilities[unitData.code] ~= nil then
@@ -129,6 +135,8 @@ function StartNewBattle()
     end)
     GroupClear(leftUnitsGroup)
     DestroyGroup(leftUnitsGroup)
+
+    ClearUpgradeFrames()
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1

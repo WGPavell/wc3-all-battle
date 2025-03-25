@@ -2514,7 +2514,8 @@ if Debug then Debug.endFile() end
 --- Created by WGPavell.
 --- DateTime: 24.03.2025 19:44
 ---
-
+---
+--- @class SimpleTypeFrame
 SimpleTypeFrame = {}
 ---new
 ---@param name string
@@ -2563,11 +2564,19 @@ function SimpleTypeFrame:new(name, type, parent, inherits, context)
         return self
     end
 
+    ---setVisible
+    ---@param visibility boolean
+    function obj:setVisible(visibility)
+        BlzFrameSetVisible(self.handle, visibility)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj
 end
 
+--- @class SimpleEmptyFrame
 SimpleEmptyFrame = {}
 setmetatable(SimpleEmptyFrame, {__index = SimpleTypeFrame})
 ---new
@@ -2578,6 +2587,7 @@ function SimpleEmptyFrame:new(name, parent, context)
     return SimpleTypeFrame:new(name, "FRAME", parent, "", context)
 end
 
+--- @class SimpleBackdropTextureFrame
 SimpleBackdropTextureFrame = {}
 setmetatable(SimpleBackdropTextureFrame, { __index = SimpleTypeFrame})
 ---new
@@ -2596,17 +2606,31 @@ function SimpleBackdropTextureFrame:new(name, texturePath, parent, context)
     return frame
 end
 
+--- @class SimpleTextFrame
 SimpleTextFrame = {}
 setmetatable(SimpleTextFrame, {__index = SimpleTypeFrame})
 ---new
 ---@param name string
+---@param text string
+---@param scale number
 ---@param parent framehandle
 ---@param context integer
 function SimpleTextFrame:new(name, text, scale, parent, context)
     local frame = SimpleTypeFrame:new(name, "TEXT", parent, "", context)
 
+    ---setText
+    ---@param text string
     function frame:setText(text)
         BlzFrameSetText(self.handle, text)
+        return self
+    end
+
+    ---setAlignment
+    ---@param verticalAlignment textaligntype
+    ---@param horizontalAlignment textaligntype
+    function frame:setAlignment(verticalAlignment, horizontalAlignment)
+        BlzFrameSetTextAlignment(self.handle, verticalAlignment, horizontalAlignment)
+        return self
     end
 
     frame:setText(text)
@@ -2615,6 +2639,7 @@ function SimpleTextFrame:new(name, text, scale, parent, context)
     return frame
 end
 
+--- @class TextureFrame
 TextureFrame = {}
 ---new
 ---@param namePrefix string
@@ -2633,6 +2658,71 @@ function TextureFrame:new(namePrefix, texturePath, parent, context)
 
     function obj:setTexture(texturePath)
         self.texture:setTexture(texturePath)
+        return self
+    end
+
+    setmetatable(obj, self)
+    self.__index = self
+    return obj
+end
+
+UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT = 1
+UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT = 2
+
+--- @class UpgradeDataFrame
+UpgradeDataFrame = {}
+---new
+---@param namePrefix string
+---@param iconPath string
+---@param text string
+---@param textScale number
+---@param textAlignment number
+---@param parent framehandle
+---@param context integer
+function UpgradeDataFrame:new(namePrefix, iconPath, text, textScale, textAlignment, parent, context)
+    local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
+    local iconFrame = TextureFrame:new(namePrefix .. "_icon", iconPath, coverFrame.handle, context)
+    local textFrame = SimpleTextFrame:new(namePrefix .. "_text", text, textScale, coverFrame.handle, context)
+    if textAlignment == UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT then
+        iconFrame.cover:setRelativePoint(FRAMEPOINT_LEFT, coverFrame.handle, FRAMEPOINT_LEFT, 0, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_LEFT, iconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.0008 * textScale, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_RIGHT, coverFrame.handle, FRAMEPOINT_RIGHT, 0, 0)
+    else
+        iconFrame.cover:setRelativePoint(FRAMEPOINT_RIGHT, coverFrame.handle, FRAMEPOINT_RIGHT, 0, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_RIGHT, iconFrame.cover.handle, FRAMEPOINT_LEFT, -0.0008 * textScale, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_LEFT, coverFrame.handle, FRAMEPOINT_LEFT, 0, 0)
+    end
+    textFrame:setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+
+    local obj = {
+        cover = coverFrame,
+        icon = iconFrame,
+        text = textFrame
+    }
+
+    function obj:setIconPath(iconPath)
+        self.icon:setTexture(iconPath)
+        return self
+    end
+
+    function obj:setText(text)
+        self.text:setText(text)
+        return self
+    end
+
+    function obj:setTextScale(scale)
+        self.text:setScale(scale)
+        return self
+    end
+
+    function obj:setVisible(visibility)
+        self.cover:setVisible(visibility)
+        return self
+    end
+
+    function obj:setSize(width, height)
+        self.cover:setSize(width, height)
+        self.icon.cover:setSize(math.min(width, height), math.min(width, height))
         return self
     end
 
@@ -3097,7 +3187,7 @@ OnInit.map(function()
             if unitsUpgradesDependencies[unit] == nil then
                 unitsUpgradesDependencies[unit] = {}
             end
-            table.insert(unitsUpgradesDependencies[unit], upgrade.code)
+            table.insert(unitsUpgradesDependencies[unit], upgrade)
         end
     end
 
@@ -3108,7 +3198,7 @@ OnInit.map(function()
             local subject = CreateUnit(subjectPlayer, FourCC(code), 0, 0, 0)
             if unitsUpgradesDependencies[code] ~= nil then
                 for _, upgrade in ipairs(unitsUpgradesDependencies[code]) do
-                    SetPlayerTechResearched(subjectPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade)))
+                    SetPlayerTechResearched(subjectPlayer, FourCC(upgrade.code), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade.code)))
                 end
             end
             local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)
@@ -3203,6 +3293,9 @@ OnInit.map(function()
     leftSideTextFrame = SimpleTextFrame:new("left_side_text", "0", 2, fullscreenWrapperFrame.handle)
     leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
 
+    --local upgradeIconFrame = TextureFrame:new("upgrade_icon_frame", "", fullscreenWrapperFrame.handle)
+    --upgradeIconFrame.cover:setSize(0.03, 0.03):setRelativePoint(FRAMEPOINT_TOPLEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+
     rightSideIconFrame = TextureFrame:new("right_side_icon", "", fullscreenWrapperFrame.handle)
     rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
     rightSideTextFrame = SimpleTextFrame:new("right_side_text", "0", 2, fullscreenWrapperFrame.handle)
@@ -3210,6 +3303,51 @@ OnInit.map(function()
 
     BlzFrameClearAllPoints(mainFrame)
 end)
+
+SIDE_FRAME_LEFT = 1
+SIDE_FRAME_RIGHT = 2
+
+upgradeFrames = {
+    [SIDE_FRAME_LEFT] = {
+        visible_total = 0,
+        frames = {}
+    },
+    [SIDE_FRAME_RIGHT] = {
+        visible_total = 0,
+        frames = {}
+    }
+}
+
+function ClearUpgradeFrames()
+    for _, sideUpgradeFrames in ipairs(upgradeFrames) do
+        ---@param upgradeFrame SimpleTypeFrame
+        for _, upgradeFrame in ipairs(sideUpgradeFrames.frames) do
+            upgradeFrame:setVisible(false)
+        end
+        sideUpgradeFrames.visible_total = 0
+    end
+end
+
+function AppendUpgradeFrame(side)
+    local frameIndex = upgradeFrames[side].visible_total + 1
+    ---@type UpgradeDataFrame
+    local upgradeFrame = upgradeFrames[side].frames[frameIndex]
+    if (upgradeFrame == nil) then
+        upgradeFrame = UpgradeDataFrame:new("upgrade_frame_container", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
+        upgradeFrame:setSize(0.034, 0.0225)
+        upgradeFrames[side].frames[frameIndex] = upgradeFrame
+        if frameIndex == 1 then
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_TOPLEFT or FRAMEPOINT_TOPRIGHT, side == SIDE_FRAME_LEFT and leftSideIconFrame.cover.handle or rightSideIconFrame.cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_BOTTOMLEFT or FRAMEPOINT_BOTTOMRIGHT, 0, -0.015)
+        elseif (frameIndex - 1) % 4 == 0 then
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_TOPLEFT or FRAMEPOINT_TOPRIGHT, upgradeFrames[side].frames[frameIndex - 4].cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_BOTTOMLEFT or FRAMEPOINT_BOTTOMRIGHT, 0, -0.003)
+        else
+            upgradeFrame.cover:setRelativePoint(side == SIDE_FRAME_LEFT and FRAMEPOINT_LEFT or FRAMEPOINT_RIGHT, upgradeFrames[side].frames[frameIndex - 1].cover.handle, side == SIDE_FRAME_LEFT and FRAMEPOINT_RIGHT or FRAMEPOINT_LEFT, side == SIDE_FRAME_LEFT and 0.001 or -0.001, 0)
+        end
+    else
+        upgradeFrame:setVisible(true)
+    end
+    upgradeFrames[side].visible_total = frameIndex
+end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
 --- Created by WGPavell.
@@ -3237,7 +3375,7 @@ sideGroups = {
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 14
+    unitIndex = 2
 }
 rightSideSpawnData = {
     raceIndex = 4,
@@ -3292,6 +3430,17 @@ function CreateUnitStack(unitData, spawnSide)
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
 
+
+    if unitsUpgradesDependencies[unitData.code] ~= nil then
+        for index, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
+            local upgradeLevel = GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade.code))
+            SetPlayerTechResearched(forPlayer, FourCC(upgrade.code), upgradeLevel)
+            AppendUpgradeFrame(spawnSide)
+            upgradeFrames[spawnSide].frames[index]:setIconPath(upgrade.icon)
+            upgradeFrames[spawnSide].frames[index]:setText(upgradeLevel)
+        end
+    end
+
     local centerPointX = SPAWN_CENTER_DISTANCE * (spawnSide == SPAWN_LEFT and -1 or 1)
     local spawnAngle = spawnSide == SPAWN_LEFT and 0 or 180
     local gridPoints = generateGridForSpawn(centerPointX, spawnAngle, unitsTotal)
@@ -3302,14 +3451,9 @@ function CreateUnitStack(unitData, spawnSide)
         --RemoveGuardPosition(unit)
         GroupAddUnit(battleUnitsGroup, unit)
         GroupAddUnit(sideGroups[spawnSide], unit)
-        --SetWidgetLife(unit, 1)
+        SetWidgetLife(unit, 1)
         TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
         table.insert(spawnedUnits, unit)
-        if unitsUpgradesDependencies[unitData.code] ~= nil then
-            for _, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
-                SetPlayerTechResearched(forPlayer, FourCC(upgrade), GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade)))
-            end
-        end
         if unitData.is_hero then
             SetHeroLevel(unit, 10, false)
             if heroAbilities[unitData.code] ~= nil then
@@ -3341,6 +3485,8 @@ function StartNewBattle()
     end)
     GroupClear(leftUnitsGroup)
     DestroyGroup(leftUnitsGroup)
+
+    ClearUpgradeFrames()
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1

@@ -100,13 +100,26 @@ SimpleTextFrame = {}
 setmetatable(SimpleTextFrame, {__index = SimpleTypeFrame})
 ---new
 ---@param name string
+---@param text string
+---@param scale number
 ---@param parent framehandle
 ---@param context integer
 function SimpleTextFrame:new(name, text, scale, parent, context)
     local frame = SimpleTypeFrame:new(name, "TEXT", parent, "", context)
 
+    ---setText
+    ---@param text string
     function frame:setText(text)
         BlzFrameSetText(self.handle, text)
+        return self
+    end
+
+    ---setAlignment
+    ---@param verticalAlignment textaligntype
+    ---@param horizontalAlignment textaligntype
+    function frame:setAlignment(verticalAlignment, horizontalAlignment)
+        BlzFrameSetTextAlignment(self.handle, verticalAlignment, horizontalAlignment)
+        return self
     end
 
     frame:setText(text)
@@ -134,6 +147,71 @@ function TextureFrame:new(namePrefix, texturePath, parent, context)
 
     function obj:setTexture(texturePath)
         self.texture:setTexture(texturePath)
+        return self
+    end
+
+    setmetatable(obj, self)
+    self.__index = self
+    return obj
+end
+
+UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT = 1
+UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT = 2
+
+--- @class UpgradeDataFrame
+UpgradeDataFrame = {}
+---new
+---@param namePrefix string
+---@param iconPath string
+---@param text string
+---@param textScale number
+---@param textAlignment number
+---@param parent framehandle
+---@param context integer
+function UpgradeDataFrame:new(namePrefix, iconPath, text, textScale, textAlignment, parent, context)
+    local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
+    local iconFrame = TextureFrame:new(namePrefix .. "_icon", iconPath, coverFrame.handle, context)
+    local textFrame = SimpleTextFrame:new(namePrefix .. "_text", text, textScale, coverFrame.handle, context)
+    if textAlignment == UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT then
+        iconFrame.cover:setRelativePoint(FRAMEPOINT_LEFT, coverFrame.handle, FRAMEPOINT_LEFT, 0, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_LEFT, iconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.0008 * textScale, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_RIGHT, coverFrame.handle, FRAMEPOINT_RIGHT, 0, 0)
+    else
+        iconFrame.cover:setRelativePoint(FRAMEPOINT_RIGHT, coverFrame.handle, FRAMEPOINT_RIGHT, 0, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_RIGHT, iconFrame.cover.handle, FRAMEPOINT_LEFT, -0.0008 * textScale, 0)
+        textFrame:setRelativePoint(FRAMEPOINT_LEFT, coverFrame.handle, FRAMEPOINT_LEFT, 0, 0)
+    end
+    textFrame:setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+
+    local obj = {
+        cover = coverFrame,
+        icon = iconFrame,
+        text = textFrame
+    }
+
+    function obj:setIconPath(iconPath)
+        self.icon:setTexture(iconPath)
+        return self
+    end
+
+    function obj:setText(text)
+        self.text:setText(text)
+        return self
+    end
+
+    function obj:setTextScale(scale)
+        self.text:setScale(scale)
+        return self
+    end
+
+    function obj:setVisible(visibility)
+        self.cover:setVisible(visibility)
+        return self
+    end
+
+    function obj:setSize(width, height)
+        self.cover:setSize(width, height)
+        self.icon.cover:setSize(math.min(width, height), math.min(width, height))
         return self
     end
 
