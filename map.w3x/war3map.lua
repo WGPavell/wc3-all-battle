@@ -2519,12 +2519,12 @@ if Debug then Debug.endFile() end
 SimpleTypeFrame = {}
 ---new
 ---@param name string
----@param type string
+---@param frameType string
 ---@param parent framehandle
 ---@param inherits string
 ---@param context integer
-function SimpleTypeFrame:new(name, type, parent, inherits, context)
-    local frame = BlzCreateFrameByType(type, name, parent, inherits or "", context or 0)
+function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
+    local frame = BlzCreateFrameByType(frameType, name, parent, inherits or "", context or 0)
     local obj = {
         handle = frame
     }
@@ -2569,6 +2569,55 @@ function SimpleTypeFrame:new(name, type, parent, inherits, context)
     function obj:setVisible(visibility)
         BlzFrameSetVisible(self.handle, visibility)
         return self
+    end
+
+    ---setAlpha
+    ---@param alpha integer
+    function obj:setAlpha(alpha)
+        BlzFrameSetAlpha(self.handle, alpha)
+        return self
+    end
+
+    ---animateFadeIn
+    ---@param duration number
+    ---@param callback function
+    function obj:animateFadeIn(duration, callback)
+        local timer = CreateTimer()
+        local ticks = 0
+        local alphaPerTick = 255 * duration / 60
+        TimerStart(timer, duration / 60, true, function()
+            local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
+            ticks = ticks + 1
+            self:setAlpha(newAlpha)
+            if newAlpha >= 255 then
+                PauseTimer(timer)
+                DestroyTimer(timer)
+                if type(callback) == "function" then
+                    callback()
+                end
+            end
+        end)
+    end
+
+    ---animateFadeOut
+    ---@param duration number
+    ---@param callback function
+    function obj:animateFadeOut(duration, callback)
+        local timer = CreateTimer()
+        local ticks = 0
+        local alphaPerTick = 255 * duration / 60
+        TimerStart(timer, duration / 60, true, function()
+            local newAlpha = math.floor(255 - alphaPerTick * ticks + 0.5)
+            ticks = ticks + 1
+            self:setAlpha(newAlpha)
+            if newAlpha <= 0 then
+                PauseTimer(timer)
+                DestroyTimer(timer)
+                if type(callback) == "function" then
+                    callback()
+                end
+            end
+        end)
     end
 
     setmetatable(obj, self)
@@ -3267,6 +3316,14 @@ leftSideTextFrame = nil
 rightSideIconFrame = nil
 --- @type SimpleTextFrame
 rightSideTextFrame = nil
+--- @type SimpleEmptyFrame
+battleInfoWrapperFrame = nil
+--- @type SimpleTextFrame
+battleInfoLeftSideTitleFrame = nil
+--- @type SimpleTextFrame
+battleInfoRightSideTitleFrame = nil
+--- @type SimpleTextFrame
+battleInfoVersusLabelFrame = nil
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -3288,18 +3345,25 @@ OnInit.map(function()
     TimerStart(fullscreenCanvasTimer, FULLSCREEN_CANVAS_SIZE_REFRESH_PERIOD, true, UpdateFullscreenCanvasSize)
     BlzFrameSetAbsPoint(fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0.4, 0)
 
-    leftSideIconFrame = TextureFrame:new("left_side_icon", "", fullscreenWrapperFrame.handle)
+    leftSideIconFrame = TextureFrame:new("LeftSideIcon", "", fullscreenWrapperFrame.handle)
     leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
-    leftSideTextFrame = SimpleTextFrame:new("left_side_text", "0", 2, fullscreenWrapperFrame.handle)
+    leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
     leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
 
-    --local upgradeIconFrame = TextureFrame:new("upgrade_icon_frame", "", fullscreenWrapperFrame.handle)
-    --upgradeIconFrame.cover:setSize(0.03, 0.03):setRelativePoint(FRAMEPOINT_TOPLEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
-
-    rightSideIconFrame = TextureFrame:new("right_side_icon", "", fullscreenWrapperFrame.handle)
+    rightSideIconFrame = TextureFrame:new("RightSideIcon", "", fullscreenWrapperFrame.handle)
     rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
-    rightSideTextFrame = SimpleTextFrame:new("right_side_text", "0", 2, fullscreenWrapperFrame.handle)
+    rightSideTextFrame = SimpleTextFrame:new("RightSideText", "0", 2, fullscreenWrapperFrame.handle)
     rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0)
+
+    battleInfoWrapperFrame = SimpleTypeFrame:new("BattleInfoWrapper", "SPRITE", fullscreenWrapperFrame.handle, "", 0)
+    battleInfoWrapperFrame:setSize(0.3, 0):setRelativePoint(FRAMEPOINT_TOP, fullscreenCanvasFrame.handle, FRAMEPOINT_TOP, 0, 0):setRelativePoint(FRAMEPOINT_BOTTOM, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0, 0)
+    battleInfoLeftSideTitleFrame = SimpleTextFrame:new("BattleInfoLeftSideTitle", "", 3, battleInfoWrapperFrame.handle)
+    battleInfoLeftSideTitleFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoWrapperFrame.handle, FRAMEPOINT_TOP, 0, -0.006)
+    battleInfoVersusLabelFrame = SimpleTextFrame:new("BattleInfoVersusLabel", "против", 2.6, battleInfoWrapperFrame.handle)
+    battleInfoVersusLabelFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoLeftSideTitleFrame.handle, FRAMEPOINT_BOTTOM, 0, -0.004)
+    battleInfoRightSideTitleFrame = SimpleTextFrame:new("BattleInfoRightSideTitle", "", 3, battleInfoWrapperFrame.handle)
+    battleInfoRightSideTitleFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoVersusLabelFrame.handle, FRAMEPOINT_BOTTOM, 0, -0.004)
+    battleInfoWrapperFrame:setVisible(false)
 
     BlzFrameClearAllPoints(mainFrame)
 end)
@@ -3333,7 +3397,7 @@ function AppendUpgradeFrame(side)
     ---@type UpgradeDataFrame
     local upgradeFrame = upgradeFrames[side].frames[frameIndex]
     if (upgradeFrame == nil) then
-        upgradeFrame = UpgradeDataFrame:new("upgrade_frame_container", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
+        upgradeFrame = UpgradeDataFrame:new("UpgradeFrameContainer", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
         upgradeFrame:setSize(0.034, 0.0225)
         upgradeFrames[side].frames[frameIndex] = upgradeFrame
         if frameIndex == 1 then
@@ -3384,6 +3448,8 @@ rightSideSpawnData = {
 
 sideFrames = nil
 
+battleSideFrames = nil
+
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
     local left = (centerX - (SPAWN_RADIUS_WIDTH / 2)  * directionDiff)
@@ -3429,7 +3495,7 @@ function CreateUnitStack(unitData, spawnSide)
 
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
-
+    battleSideFrames[spawnSide]:setText("|cffffcc00" .. unitData.name .. " [" .. unitsTotal .. "]|r")
 
     if unitsUpgradesDependencies[unitData.code] ~= nil then
         for index, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
@@ -3529,6 +3595,13 @@ function StartNewBattle()
     local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
     local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
+
+    battleInfoWrapperFrame:setVisible(true)
+    battleInfoWrapperFrame:animateFadeIn(0.4, function()
+        TimerStart(CreateTimer(), 1, false, function()
+            battleInfoWrapperFrame:animateFadeOut(0.4)
+        end)
+    end)
     for _, unit in ipairs(leftSideUnits) do
         IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
     end
@@ -3614,6 +3687,10 @@ OnInit.map(function()
             icon = rightSideIconFrame,
             text = rightSideTextFrame
         }
+    }
+    battleSideFrames = {
+        [SPAWN_LEFT] = battleInfoLeftSideTitleFrame,
+        [SPAWN_RIGHT] = battleInfoRightSideTitleFrame
     }
     --local unit = CreateUnit(Player(0), FourCC('Hamg'), 0, 0, 0)
     --SetHeroLevel(unit, 10, false)

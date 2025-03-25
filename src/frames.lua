@@ -32,6 +32,14 @@ leftSideTextFrame = nil
 rightSideIconFrame = nil
 --- @type SimpleTextFrame
 rightSideTextFrame = nil
+--- @type SimpleEmptyFrame
+battleInfoWrapperFrame = nil
+--- @type SimpleTextFrame
+battleInfoLeftSideTitleFrame = nil
+--- @type SimpleTextFrame
+battleInfoRightSideTitleFrame = nil
+--- @type SimpleTextFrame
+battleInfoVersusLabelFrame = nil
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -53,18 +61,25 @@ OnInit.map(function()
     TimerStart(fullscreenCanvasTimer, FULLSCREEN_CANVAS_SIZE_REFRESH_PERIOD, true, UpdateFullscreenCanvasSize)
     BlzFrameSetAbsPoint(fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0.4, 0)
 
-    leftSideIconFrame = TextureFrame:new("left_side_icon", "", fullscreenWrapperFrame.handle)
+    leftSideIconFrame = TextureFrame:new("LeftSideIcon", "", fullscreenWrapperFrame.handle)
     leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
-    leftSideTextFrame = SimpleTextFrame:new("left_side_text", "0", 2, fullscreenWrapperFrame.handle)
+    leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
     leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
 
-    --local upgradeIconFrame = TextureFrame:new("upgrade_icon_frame", "", fullscreenWrapperFrame.handle)
-    --upgradeIconFrame.cover:setSize(0.03, 0.03):setRelativePoint(FRAMEPOINT_TOPLEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
-
-    rightSideIconFrame = TextureFrame:new("right_side_icon", "", fullscreenWrapperFrame.handle)
+    rightSideIconFrame = TextureFrame:new("RightSideIcon", "", fullscreenWrapperFrame.handle)
     rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
-    rightSideTextFrame = SimpleTextFrame:new("right_side_text", "0", 2, fullscreenWrapperFrame.handle)
+    rightSideTextFrame = SimpleTextFrame:new("RightSideText", "0", 2, fullscreenWrapperFrame.handle)
     rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0)
+
+    battleInfoWrapperFrame = SimpleTypeFrame:new("BattleInfoWrapper", "SPRITE", fullscreenWrapperFrame.handle, "", 0)
+    battleInfoWrapperFrame:setSize(0.3, 0):setRelativePoint(FRAMEPOINT_TOP, fullscreenCanvasFrame.handle, FRAMEPOINT_TOP, 0, 0):setRelativePoint(FRAMEPOINT_BOTTOM, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0, 0)
+    battleInfoLeftSideTitleFrame = SimpleTextFrame:new("BattleInfoLeftSideTitle", "", 3, battleInfoWrapperFrame.handle)
+    battleInfoLeftSideTitleFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoWrapperFrame.handle, FRAMEPOINT_TOP, 0, -0.006)
+    battleInfoVersusLabelFrame = SimpleTextFrame:new("BattleInfoVersusLabel", "против", 2.6, battleInfoWrapperFrame.handle)
+    battleInfoVersusLabelFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoLeftSideTitleFrame.handle, FRAMEPOINT_BOTTOM, 0, -0.004)
+    battleInfoRightSideTitleFrame = SimpleTextFrame:new("BattleInfoRightSideTitle", "", 3, battleInfoWrapperFrame.handle)
+    battleInfoRightSideTitleFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoVersusLabelFrame.handle, FRAMEPOINT_BOTTOM, 0, -0.004)
+    battleInfoWrapperFrame:setVisible(false)
 
     BlzFrameClearAllPoints(mainFrame)
 end)
@@ -98,7 +113,7 @@ function AppendUpgradeFrame(side)
     ---@type UpgradeDataFrame
     local upgradeFrame = upgradeFrames[side].frames[frameIndex]
     if (upgradeFrame == nil) then
-        upgradeFrame = UpgradeDataFrame:new("upgrade_frame_container", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
+        upgradeFrame = UpgradeDataFrame:new("UpgradeFrameContainer", "", "0", 1.25, side == SIDE_FRAME_LEFT and UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_RIGHT or UPGRADE_DATA_FRAME_TEXT_ALIGNMENT_LEFT, fullscreenWrapperFrame.handle, frameIndex - 1)
         upgradeFrame:setSize(0.034, 0.0225)
         upgradeFrames[side].frames[frameIndex] = upgradeFrame
         if frameIndex == 1 then

@@ -34,6 +34,8 @@ rightSideSpawnData = {
 
 sideFrames = nil
 
+battleSideFrames = nil
+
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
     local left = (centerX - (SPAWN_RADIUS_WIDTH / 2)  * directionDiff)
@@ -79,7 +81,7 @@ function CreateUnitStack(unitData, spawnSide)
 
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
-
+    battleSideFrames[spawnSide]:setText("|cffffcc00" .. unitData.name .. " [" .. unitsTotal .. "]|r")
 
     if unitsUpgradesDependencies[unitData.code] ~= nil then
         for index, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
@@ -179,6 +181,13 @@ function StartNewBattle()
     local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
     local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
+
+    battleInfoWrapperFrame:setVisible(true)
+    battleInfoWrapperFrame:animateFadeIn(0.4, function()
+        TimerStart(CreateTimer(), 1, false, function()
+            battleInfoWrapperFrame:animateFadeOut(0.4)
+        end)
+    end)
     for _, unit in ipairs(leftSideUnits) do
         IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
     end
@@ -264,6 +273,10 @@ OnInit.map(function()
             icon = rightSideIconFrame,
             text = rightSideTextFrame
         }
+    }
+    battleSideFrames = {
+        [SPAWN_LEFT] = battleInfoLeftSideTitleFrame,
+        [SPAWN_RIGHT] = battleInfoRightSideTitleFrame
     }
     --local unit = CreateUnit(Player(0), FourCC('Hamg'), 0, 0, 0)
     --SetHeroLevel(unit, 10, false)

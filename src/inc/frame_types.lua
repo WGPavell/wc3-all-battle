@@ -8,12 +8,12 @@
 SimpleTypeFrame = {}
 ---new
 ---@param name string
----@param type string
+---@param frameType string
 ---@param parent framehandle
 ---@param inherits string
 ---@param context integer
-function SimpleTypeFrame:new(name, type, parent, inherits, context)
-    local frame = BlzCreateFrameByType(type, name, parent, inherits or "", context or 0)
+function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
+    local frame = BlzCreateFrameByType(frameType, name, parent, inherits or "", context or 0)
     local obj = {
         handle = frame
     }
@@ -58,6 +58,55 @@ function SimpleTypeFrame:new(name, type, parent, inherits, context)
     function obj:setVisible(visibility)
         BlzFrameSetVisible(self.handle, visibility)
         return self
+    end
+
+    ---setAlpha
+    ---@param alpha integer
+    function obj:setAlpha(alpha)
+        BlzFrameSetAlpha(self.handle, alpha)
+        return self
+    end
+
+    ---animateFadeIn
+    ---@param duration number
+    ---@param callback function
+    function obj:animateFadeIn(duration, callback)
+        local timer = CreateTimer()
+        local ticks = 0
+        local alphaPerTick = 255 * duration / 60
+        TimerStart(timer, duration / 60, true, function()
+            local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
+            ticks = ticks + 1
+            self:setAlpha(newAlpha)
+            if newAlpha >= 255 then
+                PauseTimer(timer)
+                DestroyTimer(timer)
+                if type(callback) == "function" then
+                    callback()
+                end
+            end
+        end)
+    end
+
+    ---animateFadeOut
+    ---@param duration number
+    ---@param callback function
+    function obj:animateFadeOut(duration, callback)
+        local timer = CreateTimer()
+        local ticks = 0
+        local alphaPerTick = 255 * duration / 60
+        TimerStart(timer, duration / 60, true, function()
+            local newAlpha = math.floor(255 - alphaPerTick * ticks + 0.5)
+            ticks = ticks + 1
+            self:setAlpha(newAlpha)
+            if newAlpha <= 0 then
+                PauseTimer(timer)
+                DestroyTimer(timer)
+                if type(callback) == "function" then
+                    callback()
+                end
+            end
+        end)
     end
 
     setmetatable(obj, self)
