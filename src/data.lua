@@ -383,6 +383,8 @@ heroAbilities = {
     Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'}
 }
 
+SPELL_IMMUNE_ABILITIES = {'Amim', 'ACm2', 'ACm3', 'ACmi'}
+
 unitsUpgradesDependencies = {}
 unitList = {}
 
@@ -411,8 +413,17 @@ OnInit.map(function()
             local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)
             local attack1_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 0)
             local attack1_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0)
+            local attack1_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0)) == ATTACK_TYPE_MAGIC
             local attack2_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 1)
             local attack2_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1)
+            local attack2_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 1)) == ATTACK_TYPE_MAGIC
+            local have_immune = false
+            for _, spellId in ipairs(SPELL_IMMUNE_ABILITIES) do
+                if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
+                    have_immune = true
+                    break
+                end
+            end
             table.insert(unitsData, {
                 code = code,
                 name = BlzGetUnitStringField(subject, UNIT_SF_NAME),
@@ -421,12 +432,18 @@ OnInit.map(function()
                 unit_target = {
                     ground = targeted_as & TARGET_FLAG_GROUND_INT ~= 0,
                     air = targeted_as & TARGET_FLAG_AIR_INT ~= 0,
+                    immune = have_immune
                 },
                 attack_target = {
                     ground = (attack1_enabled and attack1_targets & TARGET_FLAG_GROUND_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_GROUND_INT ~= 0),
-                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0)
+                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0),
+                    magic = (attack1_enabled or attack2_enabled) and ((not attack1_enabled or (attack1_enabled and attack1_magic)) and (not attack2_enabled or (attack2_enabled and attack2_magic))),
                 },
-                icon = BlzGetAbilityIcon(FourCC(code))
+                icon = BlzGetAbilityIcon(FourCC(code)),
+                battles = 0,
+                victories = 0,
+                total_died = 0,
+                total_killed = 0
             })
             RemoveUnit(subject)
         end

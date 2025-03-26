@@ -171,9 +171,9 @@ function StartNewBattle()
         local rightUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
 --        debugPrint("Left side name " .. leftUnitData.name)
 --        debugPrint("Right side name " .. rightUnitData.name)
-        local leftCanAttackRight = (leftUnitData.attack_target.ground and rightUnitData.unit_target.ground) or (leftUnitData.attack_target.air and rightUnitData.unit_target.air)
+        local leftCanAttackRight = ((leftUnitData.attack_target.ground and rightUnitData.unit_target.ground) or (leftUnitData.attack_target.air and rightUnitData.unit_target.air)) and not (leftUnitData.attack_target.magic and rightUnitData.unit_target.immune)
 --        debugPrint(leftCanAttackRight and "Left can attack right" or "Left can't attack right")
-        local rightCanAttackLeft = (rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air)
+        local rightCanAttackLeft = (rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air) and not (rightUnitData.attack_target.magic and leftUnitData.unit_target.immune)
 --        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
     until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
 
@@ -182,7 +182,8 @@ function StartNewBattle()
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
     local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
 
-    battleInfoWrapperFrame:setVisible(true)
+    UpdateStatisticsFrames()
+
     battleInfoWrapperFrame:animateFadeIn(0.4, function()
         TimerStart(CreateTimer(), 1, false, function()
             battleInfoWrapperFrame:animateFadeOut(0.4)
@@ -217,6 +218,21 @@ function IssueSideUnitsAttackRecycle()
     TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
 end
 
+function FormatStatisticsTextFromData(unitData)
+    local victoryPercentage = 0
+    if unitData.battles > 0 then
+        victoryPercentage = unitData.victories / unitData.battles * 100
+    end
+    return "Всего убито: " .. tostring(unitData.total_killed) .. "\nВсего умерло: " .. tostring(unitData.total_died) .. "\nВсего битв: " .. tostring(unitData.battles) .. "\nВсего побед: " .. tostring(unitData.victories) .. " (" .. string.format("%.2f", victoryPercentage) .. "%)"
+end
+
+function UpdateStatisticsFrames()
+    local leftSideUnitsData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    local rightSideUnitsData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
+    sideFrames[SPAWN_LEFT].statistics:setText(FormatStatisticsTextFromData(leftSideUnitsData))
+    sideFrames[SPAWN_RIGHT].statistics:setText(FormatStatisticsTextFromData(rightSideUnitsData))
+end
+
 function BattleUnitDyingTrgAction()
     local unit = GetDyingUnit()
     local unitSide = unitsInBattle[unit]
@@ -224,7 +240,17 @@ function BattleUnitDyingTrgAction()
     GroupRemoveUnit(sideGroups[unitSide], unit)
     battleUnitsLeft[unitSide] = battleUnitsLeft[unitSide] - 1
     sideFrames[unitSide].text:setText(tostring(battleUnitsLeft[unitSide]))
+    local leftSideUnitsData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    local rightSideUnitsData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
+    local losingUnitsData = unitSide == SPAWN_LEFT and leftSideUnitsData or rightSideUnitsData
+    local victoriousUnitsData = unitSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
+    losingUnitsData.total_died = losingUnitsData.total_died + 1
+    victoriousUnitsData.total_killed = victoriousUnitsData.total_killed + 1
+    UpdateStatisticsFrames()
     if battleUnitsLeft[unitSide] <= 0 then
+        losingUnitsData.battles = losingUnitsData.battles + 1
+        victoriousUnitsData.battles = victoriousUnitsData.battles + 1
+        victoriousUnitsData.victories = victoriousUnitsData.victories + 1
         StartNewBattle()
     end
     --debugPrint("Left on side " .. unitSide .. ": " .. battleUnitsLeft[unitSide])
@@ -267,18 +293,21 @@ OnInit.map(function()
     sideFrames = {
         [SPAWN_LEFT] = {
             icon = leftSideIconFrame,
-            text = leftSideTextFrame
+            text = leftSideTextFrame,
+            statistics = leftSideStatisticsTextFrame,
         },
         [SPAWN_RIGHT] = {
             icon = rightSideIconFrame,
-            text = rightSideTextFrame
+            text = rightSideTextFrame,
+            statistics = rightSideStatisticsTextFrame,
         }
     }
     battleSideFrames = {
         [SPAWN_LEFT] = battleInfoLeftSideTitleFrame,
         [SPAWN_RIGHT] = battleInfoRightSideTitleFrame
     }
-    --local unit = CreateUnit(Player(0), FourCC('Hamg'), 0, 0, 0)
+    --local unit = CreateUnit(Player(0), FourCC('hsor'), 0, 0, 0)
+    --debugPrintAny(BlzGetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0))
     --SetHeroLevel(unit, 10, false)
     --for _, ability in ipairs(heroAbilities['Hamg']) do
     --    repeat

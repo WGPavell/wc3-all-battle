@@ -28,10 +28,14 @@ end
 leftSideIconFrame = nil
 --- @type SimpleTextFrame
 leftSideTextFrame = nil
+--- @type SimpleTextFrame
+leftSideStatisticsTextFrame = nil
 --- @type TextureFrame
 rightSideIconFrame = nil
 --- @type SimpleTextFrame
 rightSideTextFrame = nil
+--- @type SimpleTextFrame
+rightSideStatisticsTextFrame = nil
 --- @type SimpleEmptyFrame
 battleInfoWrapperFrame = nil
 --- @type SimpleTextFrame
@@ -65,11 +69,15 @@ OnInit.map(function()
     leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
     leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
     leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
+    leftSideStatisticsTextFrame = SimpleTextFrame:new("LeftSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
+    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT)
 
     rightSideIconFrame = TextureFrame:new("RightSideIcon", "", fullscreenWrapperFrame.handle)
     rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
     rightSideTextFrame = SimpleTextFrame:new("RightSideText", "0", 2, fullscreenWrapperFrame.handle)
     rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0)
+    rightSideStatisticsTextFrame = SimpleTextFrame:new("RightSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
+    rightSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideTextFrame.handle, FRAMEPOINT_LEFT, -0.01, 0):setRelativePoint(FRAMEPOINT_TOP, rightSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_RIGHT)
 
     battleInfoWrapperFrame = SimpleTypeFrame:new("BattleInfoWrapper", "SPRITE", fullscreenWrapperFrame.handle, "", 0)
     battleInfoWrapperFrame:setSize(0.3, 0):setRelativePoint(FRAMEPOINT_TOP, fullscreenCanvasFrame.handle, FRAMEPOINT_TOP, 0, 0):setRelativePoint(FRAMEPOINT_BOTTOM, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0, 0)

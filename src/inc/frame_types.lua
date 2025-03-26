@@ -74,6 +74,7 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
         local timer = CreateTimer()
         local ticks = 0
         local alphaPerTick = 255 * duration / 60
+        self:setVisible(true)
         TimerStart(timer, duration / 60, true, function()
             local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
@@ -102,6 +103,7 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
             if newAlpha <= 0 then
                 PauseTimer(timer)
                 DestroyTimer(timer)
+                self:setVisible(false)
                 if type(callback) == "function" then
                     callback()
                 end
