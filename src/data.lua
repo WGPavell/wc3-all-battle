@@ -382,6 +382,7 @@ heroAbilities = {
     Udre = {'AUav', 'AUsl', 'AUcs', 'AUin'},
     Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'}
 }
+abilitiesIcons = {}
 
 SPELL_IMMUNE_ABILITIES = {'Amim', 'ACm2', 'ACm3', 'ACmi'}
 
@@ -397,6 +398,14 @@ OnInit.map(function()
                 unitsUpgradesDependencies[unit] = {}
             end
             table.insert(unitsUpgradesDependencies[unit], upgrade)
+        end
+    end
+
+    for _, abilityList in pairs(heroAbilities) do
+        for _, ability in ipairs(abilityList) do
+            if abilitiesIcons[ability] == nil then
+                abilitiesIcons[ability] = BlzGetAbilityIcon(FourCC(ability))
+            end
         end
     end
 

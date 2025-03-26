@@ -44,6 +44,8 @@ battleInfoLeftSideTitleFrame = nil
 battleInfoRightSideTitleFrame = nil
 --- @type SimpleTextFrame
 battleInfoVersusLabelFrame = nil
+--- @type SimpleTypeFrame
+battleWinnerBackdropFrame = nil
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -88,6 +90,15 @@ OnInit.map(function()
     battleInfoRightSideTitleFrame = SimpleTextFrame:new("BattleInfoRightSideTitle", "", 3, battleInfoWrapperFrame.handle)
     battleInfoRightSideTitleFrame:setRelativePoint(FRAMEPOINT_TOP, battleInfoVersusLabelFrame.handle, FRAMEPOINT_BOTTOM, 0, -0.004)
     battleInfoWrapperFrame:setVisible(false)
+
+    battleWinnerBackdropFrame = TemplateBackdropFrame:new("BattleWinnerBackdrop", "QuestButtonBaseTemplate", fullscreenWrapperFrame.handle)
+    battleWinnerBackdropFrame.cover:setAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3):setSize(0.4, 0):animateSize(0.4, nil, 0.3, nil, nil, function()
+        TimerStart(CreateTimer(), 1, false, function()
+            battleWinnerBackdropFrame.cover:animateSize(1, nil, 0, nil, nil, function()
+                battleWinnerBackdropFrame.cover:setVisible(false)
+            end)
+        end)
+    end)
 
     BlzFrameClearAllPoints(mainFrame)
 end)

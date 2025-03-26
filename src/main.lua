@@ -25,7 +25,7 @@ sideGroups = {
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 2
+    unitIndex = 14
 }
 rightSideSpawnData = {
     raceIndex = 4,
@@ -83,7 +83,7 @@ function CreateUnitStack(unitData, spawnSide)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
     battleSideFrames[spawnSide]:setText("|cffffcc00" .. unitData.name .. " [" .. unitsTotal .. "]|r")
 
-    if unitsUpgradesDependencies[unitData.code] ~= nil then
+    if not unitData.is_hero and unitsUpgradesDependencies[unitData.code] ~= nil then
         for index, upgrade in ipairs(unitsUpgradesDependencies[unitData.code]) do
             local upgradeLevel = GetPlayerTechMaxAllowed(forPlayer, FourCC(upgrade.code))
             SetPlayerTechResearched(forPlayer, FourCC(upgrade.code), upgradeLevel)
@@ -97,6 +97,7 @@ function CreateUnitStack(unitData, spawnSide)
     local spawnAngle = spawnSide == SPAWN_LEFT and 0 or 180
     local gridPoints = generateGridForSpawn(centerPointX, spawnAngle, unitsTotal)
     local spawnedUnits = {}
+    local isHeroAbilityFramesAppended = false
     for _, point in ipairs(gridPoints) do
         local unit = CreateUnit(forPlayer, FourCC(unitData.code), point.x, point.y, spawnAngle)
         unitsInBattle[unit] = spawnSide
@@ -109,13 +110,20 @@ function CreateUnitStack(unitData, spawnSide)
         if unitData.is_hero then
             SetHeroLevel(unit, 10, false)
             if heroAbilities[unitData.code] ~= nil then
-                for _, ability in ipairs(heroAbilities[unitData.code]) do
+                for abilityIndex, ability in ipairs(heroAbilities[unitData.code]) do
+                    local prevLevel
                     repeat
-                        local prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
+                        prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
                         SelectHeroSkill(unit, FourCC(ability))
                     until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
+                    if not isHeroAbilityFramesAppended then
+                        AppendUpgradeFrame(spawnSide)
+                        upgradeFrames[spawnSide].frames[abilityIndex]:setIconPath(abilitiesIcons[ability])
+                        upgradeFrames[spawnSide].frames[abilityIndex]:setText(prevLevel)
+                    end
                 end
             end
+            isHeroAbilityFramesAppended = true
         end
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
@@ -288,8 +296,10 @@ OnInit.map(function()
     SetCameraPosition(0, 0)
     SetTimeOfDay(12)
     SuspendTimeOfDay(true)
-    SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
-    SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
+    SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
+    SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
+    --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
+    --SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
     sideFrames = {
         [SPAWN_LEFT] = {
             icon = leftSideIconFrame,

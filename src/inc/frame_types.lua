@@ -3,20 +3,11 @@
 --- Created by WGPavell.
 --- DateTime: 24.03.2025 19:44
 ---
----
---- @class SimpleTypeFrame
-SimpleTypeFrame = {}
----new
----@param name string
----@param frameType string
----@param parent framehandle
----@param inherits string
----@param context integer
-function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
-    local frame = BlzCreateFrameByType(frameType, name, parent, inherits or "", context or 0)
-    local obj = {
-        handle = frame
-    }
+
+--- @class SimpleBaseFrame
+SimpleBaseFrame = {}
+function SimpleBaseFrame:new()
+    local obj = {handle = nil}
 
     ---setSize
     ---@param width number
@@ -73,9 +64,9 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
     function obj:animateFadeIn(duration, callback)
         local timer = CreateTimer()
         local ticks = 0
-        local alphaPerTick = 255 * duration / 60
+        local alphaPerTick = 255 / duration / 60
         self:setVisible(true)
-        TimerStart(timer, duration / 60, true, function()
+        TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
             self:setAlpha(newAlpha)
@@ -87,6 +78,7 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
                 end
             end
         end)
+        return self
     end
 
     ---animateFadeOut
@@ -95,8 +87,8 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
     function obj:animateFadeOut(duration, callback)
         local timer = CreateTimer()
         local ticks = 0
-        local alphaPerTick = 255 * duration / 60
-        TimerStart(timer, duration / 60, true, function()
+        local alphaPerTick = 255 / duration / 60
+        TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(255 - alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
             self:setAlpha(newAlpha)
@@ -109,11 +101,95 @@ function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
                 end
             end
         end)
+        return self
+    end
+
+    ---getWidth
+    function obj:getWidth()
+        return BlzFrameGetWidth(self.handle)
+    end
+
+    ---getHeight
+    function obj:getHeight()
+        return BlzFrameGetHeight(self.handle)
+    end
+
+    ---animateSize
+    ---@param duration number
+    ---@param toWidth number
+    ---@param toHeight number
+    ---@param fromWidth number
+    ---@param fromHeight number
+    ---@param callback function
+    function obj:animateSize(duration, toWidth, toHeight, fromWidth, fromHeight, callback)
+        local animateWidth = toWidth ~= nil
+        local animateHeight = toHeight ~= nil
+        fromWidth = fromWidth == nil and self:getWidth() or fromWidth
+        fromHeight = fromHeight == nil and self:getHeight() or fromHeight
+        local ticks = 0
+        local finishTicks = duration * 60
+        local timer = CreateTimer()
+        local widthPerTick = animateWidth and (toWidth - fromWidth) / duration / 60 or 0
+        local heightPerTick = animateHeight and (toHeight - fromHeight) / duration / 60 or 0
+        TimerStart(timer, 1 / 60, true, function()
+            ticks = ticks + 1
+            self:setSize(fromWidth + (widthPerTick * ticks), fromHeight + (heightPerTick * ticks))
+            if ticks >= finishTicks then
+                PauseTimer(timer)
+                DestroyTimer(timer)
+                if type(callback) == "function" then
+                    callback()
+                end
+            end
+        end)
+        return self
     end
 
     setmetatable(obj, self)
     self.__index = self
     return obj
+end
+
+--- @class SimpleTypeFrame
+SimpleTypeFrame = {}
+setmetatable(SimpleTypeFrame, {__index = SimpleBaseFrame})
+---new
+---@param name string
+---@param frameType string
+---@param parent framehandle
+---@param inherits string
+---@param context integer
+function SimpleTypeFrame:new(name, frameType, parent, inherits, context)
+    local frame = SimpleBaseFrame:new()
+    frame.handle = BlzCreateFrameByType(frameType, name, parent, inherits or "", context or 0)
+    return frame
+end
+
+--- @class SimpleTemplateFrame
+SimpleTemplateFrame = {}
+setmetatable(SimpleTemplateFrame, {__index = SimpleBaseFrame})
+---new
+---@param template string
+---@param parent framehandle
+---@param priority integer
+---@param context integer
+function SimpleTemplateFrame:new(template, parent, priority, context)
+    local frame = SimpleBaseFrame:new()
+    frame.handle = BlzCreateFrame(template, parent, priority or 0, context or 0)
+    return frame
+end
+
+--- @class SimpleSimpleFrame
+SimpleSimpleFrame = {}
+setmetatable(SimpleSimpleFrame, {__index = SimpleBaseFrame})
+---new
+---@param template string
+---@param parent framehandle
+---@param context integer
+function SimpleSimpleFrame:new(template, parent, context)
+    local frame = SimpleBaseFrame:new()
+    frame.handle = BlzCreateSimpleFrame(template, parent, context or 0)
+    return frame
 end
 
 --- @class SimpleEmptyFrame
@@ -265,6 +341,29 @@ function UpgradeDataFrame:new(namePrefix, iconPath, text, textScale, textAlignme
         self.icon.cover:setSize(math.min(width, height), math.min(width, height))
         return self
     end
+
+    setmetatable(obj, self)
+    self.__index = self
+    return obj
+end
+
+--- @class TemplateBackdropFrame
+TemplateBackdropFrame = {}
+---new
+---@param namePrefix string
+---@param template string
+---@param parent framehandle
+---@param priority integer
+---@param context integer
+function TemplateBackdropFrame:new(namePrefix, template, parent, priority, context)
+    local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
+    local backdropFrame = SimpleTemplateFrame:new(template, coverFrame.handle, priority, context)
+    BlzFrameSetAllPoints(backdropFrame.handle, coverFrame.handle)
+
+    local obj = {
+        cover = coverFrame,
+        backdrop = backdropFrame
+    }
 
     setmetatable(obj, self)
     self.__index = self
