@@ -25,11 +25,11 @@ sideGroups = {
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 14
+    unitIndex = 2
 }
 rightSideSpawnData = {
     raceIndex = 4,
-    unitIndex = 13
+    unitIndex = 2
 }
 
 sideFrames = nil
@@ -254,18 +254,34 @@ function BattleUnitDyingTrgAction()
     local victoriousUnitsData = unitSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
     losingUnitsData.total_died = losingUnitsData.total_died + 1
     victoriousUnitsData.total_killed = victoriousUnitsData.total_killed + 1
-    UpdateStatisticsFrames()
     if battleUnitsLeft[unitSide] <= 0 then
         losingUnitsData.battles = losingUnitsData.battles + 1
         victoriousUnitsData.battles = victoriousUnitsData.battles + 1
         victoriousUnitsData.victories = victoriousUnitsData.victories + 1
-        StartNewBattle()
+        battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. victoriousUnitsData.name)
+        battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
+            DelayCallback(1.5, function()
+                battleWinnerTextFrame:animateFadeOut(0.75)
+                battleWinnerBackdropFrame.cover:animateSize(1.25, nil, 0, nil, nil, function()
+                    battleWinnerBackdropFrame.cover:setVisible(false)
+                    DelayCallback(1, function()
+                        StartNewBattle()
+                    end)
+                end)
+            end)
+        end)
+        DelayCallback(0.35, function()
+            battleWinnerTextFrame:animateFadeIn(0.4)
+        end)
     end
+    UpdateStatisticsFrames()
     --debugPrint("Left on side " .. unitSide .. ": " .. battleUnitsLeft[unitSide])
 end
 
 centerCameraTimer = CreateTimer()
-CENTER_CAMERA_DURATION = 1
+panningCamera = CreateCameraSetup()
+CENTER_CAMERA_DURATION = 0.5
+PANNING_CAMERA_FOV_X = 70.0
 
 function CenterCameraOnGroups()
     local minX = 0
@@ -287,7 +303,19 @@ function CenterCameraOnGroups()
             totalUnits = totalUnits + 1
         end)
     end
-    PanCameraToTimedWithZ(totalX / totalUnits, totalY / totalUnits, math.max(math.abs(maxX - minX), math.abs(maxY - minY)) / 5, CENTER_CAMERA_DURATION)
+    totalUnits = math.max(1, totalUnits)
+    local centerX = totalX / totalUnits
+    local centerY = totalY / totalUnits
+    local width = maxX - minX
+    local height = maxY - minY
+    local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
+    local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
+    local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
+    local distance = math.max(distanceWidth, distanceHeight)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
+    CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
+    CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
+    --PanCameraToTimedWithZ(totalX / totalUnits, totalY / totalUnits, math.max(math.abs(maxX - minX), math.abs(maxY - minY)) / 5, CENTER_CAMERA_DURATION)
 end
 
 OnInit.map(function()
@@ -300,6 +328,7 @@ OnInit.map(function()
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
     --SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
+
     sideFrames = {
         [SPAWN_LEFT] = {
             icon = leftSideIconFrame,
@@ -316,6 +345,20 @@ OnInit.map(function()
         [SPAWN_LEFT] = battleInfoLeftSideTitleFrame,
         [SPAWN_RIGHT] = battleInfoRightSideTitleFrame
     }
+
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_ROTATION, 90.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, 1650.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_ROLL, 0.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_FIELD_OF_VIEW, PANNING_CAMERA_FOV_X, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_FARZ, 5000.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_NEARZ, 16.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
+    CameraSetupSetDestPosition(panningCamera, 0, 0, 0.0)
+
     --local unit = CreateUnit(Player(0), FourCC('hsor'), 0, 0, 0)
     --debugPrintAny(BlzGetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0))
     --SetHeroLevel(unit, 10, false)
@@ -325,8 +368,10 @@ OnInit.map(function()
     --        SelectHeroSkill(unit, FourCC(ability))
     --    until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
     --end
+
     battleUnitDyingTrg = CreateTrigger()
     TriggerAddAction(battleUnitDyingTrg, BattleUnitDyingTrgAction)
+
 end)
 
 OnInit.final(function()

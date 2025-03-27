@@ -44,8 +44,10 @@ battleInfoLeftSideTitleFrame = nil
 battleInfoRightSideTitleFrame = nil
 --- @type SimpleTextFrame
 battleInfoVersusLabelFrame = nil
---- @type SimpleTypeFrame
+--- @type TemplateBackdropFrame
 battleWinnerBackdropFrame = nil
+--- @type SimpleTextFrame
+battleWinnerTextFrame = nil
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -92,13 +94,15 @@ OnInit.map(function()
     battleInfoWrapperFrame:setVisible(false)
 
     battleWinnerBackdropFrame = TemplateBackdropFrame:new("BattleWinnerBackdrop", "QuestButtonBaseTemplate", fullscreenWrapperFrame.handle)
-    battleWinnerBackdropFrame.cover:setAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3):setSize(0.4, 0):animateSize(0.4, nil, 0.3, nil, nil, function()
-        TimerStart(CreateTimer(), 1, false, function()
-            battleWinnerBackdropFrame.cover:animateSize(1, nil, 0, nil, nil, function()
-                battleWinnerBackdropFrame.cover:setVisible(false)
-            end)
-        end)
-    end)
+    battleWinnerTextFrame = SimpleTextFrame:new("BattleWinnerText", "|cffffcc00ПОБЕДИТЕЛЬ|r\n\nОХОТНИК НА ДЕМОНОВ", 4, battleWinnerBackdropFrame.cover.handle)
+    battleWinnerTextFrame:setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+    battleWinnerBackdropFrame.cover:setAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3):setSize(0.4, 0):setVisible(false)
+    battleWinnerTextFrame
+        :setRelativePoint(FRAMEPOINT_TOP, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, -0.1)
+        :setRelativePoint(FRAMEPOINT_BOTTOM, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, 0.1)
+        :setRelativePoint(FRAMEPOINT_LEFT, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_LEFT, 0.005, 0)
+        :setRelativePoint(FRAMEPOINT_RIGHT, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_RIGHT, -0.005, 0)
+        :setVisible(false)
 
     BlzFrameClearAllPoints(mainFrame)
 end)
