@@ -452,7 +452,8 @@ OnInit.map(function()
                 battles = 0,
                 victories = 0,
                 total_died = 0,
-                total_killed = 0
+                total_killed = 0,
+                history = {}
             })
             RemoveUnit(subject)
         end

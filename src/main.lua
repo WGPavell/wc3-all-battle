@@ -35,6 +35,7 @@ rightSideSpawnData = {
 sideFrames = nil
 
 battleSideFrames = nil
+isWinningFrameAppearing = false
 
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
@@ -243,28 +244,39 @@ end
 
 function BattleUnitDyingTrgAction()
     local unit = GetDyingUnit()
-    local unitSide = unitsInBattle[unit]
-    if unitSide == nil then return end
-    GroupRemoveUnit(sideGroups[unitSide], unit)
-    battleUnitsLeft[unitSide] = battleUnitsLeft[unitSide] - 1
-    sideFrames[unitSide].text:setText(tostring(battleUnitsLeft[unitSide]))
+    local loserSide = unitsInBattle[unit]
+    if loserSide == nil then return end
+    GroupRemoveUnit(sideGroups[loserSide], unit)
+    battleUnitsLeft[loserSide] = battleUnitsLeft[loserSide] - 1
+    sideFrames[loserSide].text:setText(tostring(battleUnitsLeft[loserSide]))
     local leftSideUnitsData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitsData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
-    local losingUnitsData = unitSide == SPAWN_LEFT and leftSideUnitsData or rightSideUnitsData
-    local victoriousUnitsData = unitSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
-    losingUnitsData.total_died = losingUnitsData.total_died + 1
-    victoriousUnitsData.total_killed = victoriousUnitsData.total_killed + 1
-    if battleUnitsLeft[unitSide] <= 0 then
-        losingUnitsData.battles = losingUnitsData.battles + 1
-        victoriousUnitsData.battles = victoriousUnitsData.battles + 1
-        victoriousUnitsData.victories = victoriousUnitsData.victories + 1
-        battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. victoriousUnitsData.name)
+    local winnerSide = loserSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT
+    local loserUnitsData = loserSide == SPAWN_LEFT and leftSideUnitsData or rightSideUnitsData
+    local winnerUnitsData = loserSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
+    loserUnitsData.total_died = loserUnitsData.total_died + 1
+    winnerUnitsData.total_killed = winnerUnitsData.total_killed + 1
+    if not isWinningFrameAppearing and battleUnitsLeft[loserSide] <= 0 then
+        loserUnitsData.battles = loserUnitsData.battles + 1
+        winnerUnitsData.battles = winnerUnitsData.battles + 1
+        winnerUnitsData.victories = winnerUnitsData.victories + 1
+        isWinningFrameAppearing = true
+        battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. winnerUnitsData.name)
         battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
-            DelayCallback(1.5, function()
+            DelayCallback(2.5, function()
                 battleWinnerTextFrame:animateFadeOut(0.75)
                 battleWinnerBackdropFrame.cover:animateSize(1.25, nil, 0, nil, nil, function()
                     battleWinnerBackdropFrame.cover:setVisible(false)
                     DelayCallback(1, function()
+                        table.insert(loserUnitsData.history, {
+                            enemy = winnerUnitsData,
+                            units_left = battleUnitsLeft[winnerSide]
+                        })
+                        table.insert(winnerUnitsData.history, {
+                            enemy = loserUnitsData,
+                            units_left = battleUnitsLeft[loserSide]
+                        })
+                        isWinningFrameAppearing = false
                         StartNewBattle()
                     end)
                 end)
@@ -282,6 +294,7 @@ centerCameraTimer = CreateTimer()
 panningCamera = CreateCameraSetup()
 CENTER_CAMERA_DURATION = 0.5
 PANNING_CAMERA_FOV_X = 70.0
+PANNING_CAMERA_ANGLE_OF_ATTACK = 304.0
 
 function CenterCameraOnGroups()
     local minX = 0
@@ -307,11 +320,11 @@ function CenterCameraOnGroups()
     local centerX = totalX / totalUnits
     local centerY = totalY / totalUnits
     local width = maxX - minX
-    local height = maxY - minY
+    local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
     local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
     local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
     local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
-    local distance = math.max(distanceWidth, distanceHeight)
+    local distance = math.max(distanceWidth, distanceHeight) * 1.15
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
     CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
     CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
@@ -348,7 +361,7 @@ OnInit.map(function()
 
     CameraSetupSetField(panningCamera, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
     CameraSetupSetField(panningCamera, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-    CameraSetupSetField(panningCamera, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+    CameraSetupSetField(panningCamera, CAMERA_FIELD_ANGLE_OF_ATTACK, PANNING_CAMERA_ANGLE_OF_ATTACK, 0.0)
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, 1650.0, 0.0)
     CameraSetupSetField(panningCamera, CAMERA_FIELD_ROLL, 0.0, 0.0)
     CameraSetupSetField(panningCamera, CAMERA_FIELD_FIELD_OF_VIEW, PANNING_CAMERA_FOV_X, 0.0)
@@ -375,5 +388,5 @@ OnInit.map(function()
 end)
 
 OnInit.final(function()
-    StartNewBattle()
+    --StartNewBattle()
 end)

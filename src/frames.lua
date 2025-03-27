@@ -104,6 +104,23 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_RIGHT, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_RIGHT, -0.005, 0)
         :setVisible(false)
 
+    local totalUnitStatisticsBackdropFrame = TemplateBackdropFrame:new("TotalUnitStatisticsBackdrop", "EscMenuBackdrop", fullscreenWrapperFrame.handle)
+    totalUnitStatisticsBackdropFrame.cover
+        :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0.05, 0.05)
+        :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -0.05, 0.05)
+        :setSize(0, 0.4)
+    -- TODO: Придумать как выяснить ширину фрейма
+    --debugPrintAny(BlzFrameGetWidth(totalUnitStatisticsBackdropFrame.cover.handle))
+    --local prevFrame
+    --for i = 1, 10 do
+    --    local newFrame = TextureFrame:new("TotalUnitStatisticsEntryIcon", BlzGetAbilityIcon(FourCC('hpea')), totalUnitStatisticsBackdropFrame.cover.handle)
+    --    leftSideIconFrame.cover:setSize(0.05, 0.05):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
+    --    leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
+    --    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
+    --    leftSideStatisticsTextFrame = SimpleTextFrame:new("LeftSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
+    --    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT)
+    --end
+
     BlzFrameClearAllPoints(mainFrame)
 end)
 
