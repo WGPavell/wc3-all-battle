@@ -145,6 +145,12 @@ function SimpleBaseFrame:new()
         return self
     end
 
+    ---resetPoints
+    function obj:resetPoints()
+        BlzFrameClearAllPoints(self.handle)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj

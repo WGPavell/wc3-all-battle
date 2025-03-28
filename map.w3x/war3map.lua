@@ -1,6 +1,6 @@
-gg_trg_Untitled_Trigger_001 = nil
 gg_cam_Camera_001 = nil
 gg_cam_Camera_002 = nil
+gg_trg_Untitled_Trigger_001 = nil
 function InitGlobals()
 end
 
@@ -2687,6 +2687,12 @@ function SimpleBaseFrame:new()
         return self
     end
 
+    ---resetPoints
+    function obj:resetPoints()
+        BlzFrameClearAllPoints(self.handle)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -3579,16 +3585,69 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0.05, 0.05)
         :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -0.05, 0.05)
         :setSize(0, 0.4)
-    debugPrintAny(BlzFrameGetWidth(totalUnitStatisticsBackdropFrame.cover.handle))
+    local totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
+    totalUnitStatisticsWrapperFrame
+        :setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, 0.025, -0.025)
+        :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -0.025, -0.025)
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, 0.025)
+    --debugPrintAny(BlzFrameGetWidth(totalUnitStatisticsBackdropFrame.cover.handle))
     --local prevFrame
-    --for i = 1, 10 do
-    --    local newFrame = TextureFrame:new("TotalUnitStatisticsEntryIcon", BlzGetAbilityIcon(FourCC('hpea')), totalUnitStatisticsBackdropFrame.cover.handle)
-    --    leftSideIconFrame.cover:setSize(0.05, 0.05):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
-    --    leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
-    --    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
-    --    leftSideStatisticsTextFrame = SimpleTextFrame:new("LeftSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
-    --    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT)
-    --end
+    local frameSpaceWidth = GetScreenFrameWidth() - 0.05 * 2 - 0.025 * 2
+    local frameSpaceHeight = 0.4 - 0.025 * 2
+    local iconFrameWidth = 0.2
+    local iconFrameHeight = 0.06
+    local iconFrameHorizontalSpaceBetween = 0.01
+    local iconFrameVerticalSpaceBetween = 0.0075
+    local iconFramesPerRow = math.floor((frameSpaceWidth + iconFrameHorizontalSpaceBetween) / (iconFrameWidth + iconFrameHorizontalSpaceBetween))
+    local iconFramesPerCol = math.floor((frameSpaceHeight + iconFrameVerticalSpaceBetween) / (iconFrameHeight + iconFrameVerticalSpaceBetween))
+    local totalIconsWidth = iconFramesPerRow * iconFrameWidth
+    local totalIconsHeight = iconFramesPerCol * iconFrameHeight
+    local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
+    local finalIconFrameVerticalSpaceBetween = (frameSpaceHeight - totalIconsHeight) / (iconFramesPerCol - 1)
+    local iconFrames = {}
+    for i = 1, 100 do
+        --if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
+        --    break
+        --end
+        DelayCallback(0.1 * i, function()
+            local newWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsEntryWrapper", totalUnitStatisticsBackdropFrame.cover.handle, i)
+            local newIconFrame = TextureFrame:new("TotalUnitStatisticsEntryIcon", BlzGetAbilityIcon(FourCC('hpea')), newWrapperFrame.handle, i)
+            local newTextFrame = SimpleTextFrame:new("TotalUnitStatisticsEntryText", "Поражение", 2.25 * (iconFrameHeight / 0.06), newWrapperFrame.handle, i)
+            BlzFrameSetTextColor(newTextFrame.handle, BlzConvertColor(255, 255, 0, 0))
+            newWrapperFrame
+                :setSize(iconFrameWidth, iconFrameHeight)
+            newIconFrame.cover
+                :setSize(iconFrameHeight, iconFrameHeight)
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, newWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, newWrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+            newTextFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, newIconFrame.cover.handle, FRAMEPOINT_TOPRIGHT, 0.003, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, newIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0.003, 0)
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, newWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, newWrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+                :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+            if i == 1 then
+                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+            elseif (i - 1) % iconFramesPerRow == 0 then
+                if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
+                    for j = i - (iconFramesPerRow * iconFramesPerCol), i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow - 1 do
+                        iconFrames[j].wrapper:setVisible(false):resetPoints()
+                    end
+                    debugPrint(i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow)
+                    iconFramesPerRow[i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow].wrapper:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                end
+                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrames[i - iconFramesPerRow].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -finalIconFrameVerticalSpaceBetween)
+            else
+                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrames[i - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
+            end
+            newWrapperFrame:animateFadeIn(0.4)
+            iconFrames[i] = {
+                wrapper = newWrapperFrame,
+                icon = newIconFrame,
+                text = newTextFrame
+            }
+        end)
+    end
 
     BlzFrameClearAllPoints(mainFrame)
 end)
