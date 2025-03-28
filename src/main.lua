@@ -25,11 +25,11 @@ sideGroups = {
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 2
+    unitIndex = 14
 }
 rightSideSpawnData = {
     raceIndex = 4,
-    unitIndex = 2
+    unitIndex = 5
 }
 
 sideFrames = nil
@@ -105,7 +105,6 @@ function CreateUnitStack(unitData, spawnSide)
         --RemoveGuardPosition(unit)
         GroupAddUnit(battleUnitsGroup, unit)
         GroupAddUnit(sideGroups[spawnSide], unit)
-        SetWidgetLife(unit, 1)
         TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
         table.insert(spawnedUnits, unit)
         if unitData.is_hero then
@@ -126,12 +125,13 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
+        SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
 end
 
-function StartNewBattle()
+function PrepareNewBattle()
     PauseTimer(sideUnitsAttackRecycleTimer)
     PauseTimer(centerCameraTimer)
 
@@ -148,6 +148,8 @@ function StartNewBattle()
     DestroyGroup(leftUnitsGroup)
 
     ClearUpgradeFrames()
+
+    local prevLeftSideData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
@@ -186,6 +188,21 @@ function StartNewBattle()
 --        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
     until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
 
+    local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    if prevLeftSideData ~= leftSideUnitData then
+        ShowStatisticsFrame(prevLeftSideData.history, function()
+            DelayCallback(5, function()
+                HideStatisticsFrame(function()
+                    StartNewBattle()
+                end)
+            end)
+        end)
+    else
+        StartNewBattle()
+    end
+end
+
+function StartNewBattle()
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
@@ -270,14 +287,16 @@ function BattleUnitDyingTrgAction()
                     DelayCallback(1, function()
                         table.insert(loserUnitsData.history, {
                             enemy = winnerUnitsData,
-                            units_left = battleUnitsLeft[winnerSide]
+                            units_left = battleUnitsLeft[winnerSide],
+                            is_winner = false
                         })
                         table.insert(winnerUnitsData.history, {
                             enemy = loserUnitsData,
-                            units_left = battleUnitsLeft[loserSide]
+                            units_left = battleUnitsLeft[winnerSide],
+                            is_winner = true
                         })
                         isWinningFrameAppearing = false
-                        StartNewBattle()
+                        PrepareNewBattle()
                     end)
                 end)
             end)
@@ -388,5 +407,5 @@ OnInit.map(function()
 end)
 
 OnInit.final(function()
-    --StartNewBattle()
+    PrepareNewBattle()
 end)

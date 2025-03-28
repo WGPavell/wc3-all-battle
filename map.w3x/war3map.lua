@@ -2607,7 +2607,7 @@ function SimpleBaseFrame:new()
         local timer = CreateTimer()
         local ticks = 0
         local alphaPerTick = 255 / duration / 60
-        self:setVisible(true)
+        self:setAlpha(0):setVisible(true)
         TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
@@ -2630,6 +2630,7 @@ function SimpleBaseFrame:new()
         local timer = CreateTimer()
         local ticks = 0
         local alphaPerTick = 255 / duration / 60
+        self:setVisible(true):setAlpha(255)
         TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(255 - alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
@@ -2794,6 +2795,11 @@ function SimpleTextFrame:new(name, text, scale, parent, context)
     ---@param horizontalAlignment textaligntype
     function frame:setAlignment(verticalAlignment, horizontalAlignment)
         BlzFrameSetTextAlignment(self.handle, verticalAlignment, horizontalAlignment)
+        return self
+    end
+
+    function frame:setColor(r, g, b, a)
+        BlzFrameSetTextColor(self.handle, BlzConvertColor(a or 255, r, g, b))
         return self
     end
 
@@ -3512,6 +3518,23 @@ rightSideIconFrame = nil
 rightSideTextFrame = nil
 --- @type SimpleTextFrame
 rightSideStatisticsTextFrame = nil
+
+
+SIDE_FRAME_LEFT = 1
+SIDE_FRAME_RIGHT = 2
+
+upgradeFrames = {
+    [SIDE_FRAME_LEFT] = {
+        visible_total = 0,
+        frames = {}
+    },
+    [SIDE_FRAME_RIGHT] = {
+        visible_total = 0,
+        frames = {}
+    }
+}
+
+
 --- @type SimpleEmptyFrame
 battleInfoWrapperFrame = nil
 --- @type SimpleTextFrame
@@ -3524,6 +3547,25 @@ battleInfoVersusLabelFrame = nil
 battleWinnerBackdropFrame = nil
 --- @type SimpleTextFrame
 battleWinnerTextFrame = nil
+
+
+TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X = 0.05
+TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y = 0.05
+TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT = 0.4
+--- @type TemplateBackdropFrame
+totalUnitStatisticsBackdropFrame = nil
+
+TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X = 0.025
+TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y = 0.025
+--- @type SimpleEmptyFrame
+totalUnitStatisticsWrapperFrame = nil
+
+TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH = 0.135
+TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT = 0.03
+TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.1
+TOTAL_UNIT_STATISTICS_FADING_IN_DURATION = 1
+
+totalUnitStatisticsBattleListFrames = {}
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -3570,7 +3612,7 @@ OnInit.map(function()
     battleInfoWrapperFrame:setVisible(false)
 
     battleWinnerBackdropFrame = TemplateBackdropFrame:new("BattleWinnerBackdrop", "QuestButtonBaseTemplate", fullscreenWrapperFrame.handle)
-    battleWinnerTextFrame = SimpleTextFrame:new("BattleWinnerText", "|cffffcc00ПОБЕДИТЕЛЬ|r\n\nОХОТНИК НА ДЕМОНОВ", 4, battleWinnerBackdropFrame.cover.handle)
+    battleWinnerTextFrame = SimpleTextFrame:new("BattleWinnerText", "", 4, battleWinnerBackdropFrame.cover.handle)
     battleWinnerTextFrame:setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
     battleWinnerBackdropFrame.cover:setAbsPoint(FRAMEPOINT_CENTER, 0.4, 0.3):setSize(0.4, 0):setVisible(false)
     battleWinnerTextFrame
@@ -3580,91 +3622,20 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_RIGHT, battleWinnerBackdropFrame.cover.handle, FRAMEPOINT_RIGHT, -0.005, 0)
         :setVisible(false)
 
-    local totalUnitStatisticsBackdropFrame = TemplateBackdropFrame:new("TotalUnitStatisticsBackdrop", "EscMenuBackdrop", fullscreenWrapperFrame.handle)
+    totalUnitStatisticsBackdropFrame = TemplateBackdropFrame:new("TotalUnitStatisticsBackdrop", "EscMenuBackdrop", fullscreenWrapperFrame.handle)
     totalUnitStatisticsBackdropFrame.cover
-        :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0.05, 0.05)
-        :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -0.05, 0.05)
-        :setSize(0, 0.4)
-    local totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
+        :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y)
+        :setSize(0, TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT)
+        :setVisible(false)
+    totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
     totalUnitStatisticsWrapperFrame
-        :setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, 0.025, -0.025)
-        :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -0.025, -0.025)
-        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, 0.025)
-    --debugPrintAny(BlzFrameGetWidth(totalUnitStatisticsBackdropFrame.cover.handle))
-    --local prevFrame
-    local frameSpaceWidth = GetScreenFrameWidth() - 0.05 * 2 - 0.025 * 2
-    local frameSpaceHeight = 0.4 - 0.025 * 2
-    local iconFrameWidth = 0.2
-    local iconFrameHeight = 0.06
-    local iconFrameHorizontalSpaceBetween = 0.01
-    local iconFrameVerticalSpaceBetween = 0.0075
-    local iconFramesPerRow = math.floor((frameSpaceWidth + iconFrameHorizontalSpaceBetween) / (iconFrameWidth + iconFrameHorizontalSpaceBetween))
-    local iconFramesPerCol = math.floor((frameSpaceHeight + iconFrameVerticalSpaceBetween) / (iconFrameHeight + iconFrameVerticalSpaceBetween))
-    local totalIconsWidth = iconFramesPerRow * iconFrameWidth
-    local totalIconsHeight = iconFramesPerCol * iconFrameHeight
-    local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
-    local finalIconFrameVerticalSpaceBetween = (frameSpaceHeight - totalIconsHeight) / (iconFramesPerCol - 1)
-    local iconFrames = {}
-    for i = 1, 100 do
-        --if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
-        --    break
-        --end
-        DelayCallback(0.1 * i, function()
-            local newWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsEntryWrapper", totalUnitStatisticsBackdropFrame.cover.handle, i)
-            local newIconFrame = TextureFrame:new("TotalUnitStatisticsEntryIcon", BlzGetAbilityIcon(FourCC('hpea')), newWrapperFrame.handle, i)
-            local newTextFrame = SimpleTextFrame:new("TotalUnitStatisticsEntryText", "Поражение", 2.25 * (iconFrameHeight / 0.06), newWrapperFrame.handle, i)
-            BlzFrameSetTextColor(newTextFrame.handle, BlzConvertColor(255, 255, 0, 0))
-            newWrapperFrame
-                :setSize(iconFrameWidth, iconFrameHeight)
-            newIconFrame.cover
-                :setSize(iconFrameHeight, iconFrameHeight)
-                :setRelativePoint(FRAMEPOINT_TOPLEFT, newWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
-                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, newWrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
-            newTextFrame
-                :setRelativePoint(FRAMEPOINT_TOPLEFT, newIconFrame.cover.handle, FRAMEPOINT_TOPRIGHT, 0.003, 0)
-                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, newIconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0.003, 0)
-                :setRelativePoint(FRAMEPOINT_TOPRIGHT, newWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
-                :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, newWrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
-                :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
-            if i == 1 then
-                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
-            elseif (i - 1) % iconFramesPerRow == 0 then
-                if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
-                    for j = i - (iconFramesPerRow * iconFramesPerCol), i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow - 1 do
-                        iconFrames[j].wrapper:setVisible(false):resetPoints()
-                    end
-                    debugPrint(i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow)
-                    iconFramesPerRow[i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow].wrapper:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
-                end
-                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrames[i - iconFramesPerRow].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -finalIconFrameVerticalSpaceBetween)
-            else
-                newWrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrames[i - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
-            end
-            newWrapperFrame:animateFadeIn(0.4)
-            iconFrames[i] = {
-                wrapper = newWrapperFrame,
-                icon = newIconFrame,
-                text = newTextFrame
-            }
-        end)
-    end
+        :setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
 
     BlzFrameClearAllPoints(mainFrame)
 end)
-
-SIDE_FRAME_LEFT = 1
-SIDE_FRAME_RIGHT = 2
-
-upgradeFrames = {
-    [SIDE_FRAME_LEFT] = {
-        visible_total = 0,
-        frames = {}
-    },
-    [SIDE_FRAME_RIGHT] = {
-        visible_total = 0,
-        frames = {}
-    }
-}
 
 function ClearUpgradeFrames()
     for _, sideUpgradeFrames in ipairs(upgradeFrames) do
@@ -3695,6 +3666,84 @@ function AppendUpgradeFrame(side)
         upgradeFrame:setVisible(true)
     end
     upgradeFrames[side].visible_total = frameIndex
+end
+
+function ShowStatisticsFrame(battles, onFinishCallback)
+    totalUnitStatisticsBackdropFrame.cover:setVisible(true)
+    local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
+    local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
+    local iconFrameHorizontalSpaceBetween = 0.01
+    local iconFrameVerticalSpaceBetween = 0.0075
+    local iconFramesPerRow = math.floor((frameSpaceWidth + iconFrameHorizontalSpaceBetween) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH + iconFrameHorizontalSpaceBetween))
+    local iconFramesPerCol = math.floor((frameSpaceHeight + iconFrameVerticalSpaceBetween) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT + iconFrameVerticalSpaceBetween))
+    local totalIconsWidth = iconFramesPerRow * TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH
+    local totalIconsHeight = iconFramesPerCol * TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT
+    local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
+    local finalIconFrameVerticalSpaceBetween = (frameSpaceHeight - totalIconsHeight) / (iconFramesPerCol - 1)
+    for i, battle in ipairs(battles) do
+        DelayCallback(TOTAL_UNIT_STATISTICS_APPEAR_DELAY * i, function()
+            local wrapperFrame
+            local iconFrame
+            local textFrame
+            if totalUnitStatisticsBattleListFrames[i] == nil then
+                wrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsEntryWrapper", totalUnitStatisticsBackdropFrame.cover.handle, i)
+                iconFrame = TextureFrame:new("TotalUnitStatisticsEntryIcon", "", wrapperFrame.handle, i)
+                textFrame = SimpleTextFrame:new("TotalUnitStatisticsEntryText", "", 2.25 * (TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT / 0.06), wrapperFrame.handle, i)
+                wrapperFrame
+                    :setSize(TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH, TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT)
+                iconFrame.cover
+                    :setSize(TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT, TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT)
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, wrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, wrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+                textFrame
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrame.cover.handle, FRAMEPOINT_TOPRIGHT, 0.003, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, iconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0.003, 0)
+                    :setRelativePoint(FRAMEPOINT_TOPRIGHT, wrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, wrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+                    :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+                totalUnitStatisticsBattleListFrames[i] = {
+                    wrapper = wrapperFrame,
+                    icon = iconFrame,
+                    text = textFrame
+                }
+            else
+                wrapperFrame = totalUnitStatisticsBattleListFrames[i].wrapper
+                iconFrame = totalUnitStatisticsBattleListFrames[i].icon
+                textFrame = totalUnitStatisticsBattleListFrames[i].text
+            end
+            iconFrame:setTexture(battle.enemy.icon)
+            textFrame
+                :setText(battle.enemy.name .. "\n" .. (battle.is_winner and "Победа" or "Поражение") .. " (" .. battle.units_left .. ")")
+                :setColor(battle.is_winner and 0 or 255, battle.is_winner and 255 or 0, 0)
+            if i == 1 then
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+            elseif (i - 1) % iconFramesPerRow == 0 then
+                if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
+                    for j = i - (iconFramesPerRow * iconFramesPerCol), i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow - 1 do
+                        totalUnitStatisticsBattleListFrames[j].wrapper:setVisible(false):resetPoints()
+                    end
+                    totalUnitStatisticsBattleListFrames[i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow].wrapper:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                end
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBattleListFrames[i - iconFramesPerRow].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -finalIconFrameVerticalSpaceBetween)
+            else
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBattleListFrames[i - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
+            end
+            wrapperFrame:animateFadeIn(TOTAL_UNIT_STATISTICS_FADING_IN_DURATION, function()
+                if i >= #battles then
+                    onFinishCallback()
+                end
+            end)
+        end)
+    end
+end
+
+function HideStatisticsFrame(onFinishCallback)
+    totalUnitStatisticsBackdropFrame.cover:animateFadeOut(0.5, function()
+        for _, iconFrame in ipairs(totalUnitStatisticsBattleListFrames) do
+            iconFrame.wrapper:setVisible(false):resetPoints()
+        end
+        onFinishCallback()
+    end)
 end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
@@ -3727,7 +3776,7 @@ leftSideSpawnData = {
 }
 rightSideSpawnData = {
     raceIndex = 4,
-    unitIndex = 2
+    unitIndex = 5
 }
 
 sideFrames = nil
@@ -3829,7 +3878,7 @@ function CreateUnitStack(unitData, spawnSide)
     return spawnedUnits
 end
 
-function StartNewBattle()
+function PrepareNewBattle()
     PauseTimer(sideUnitsAttackRecycleTimer)
     PauseTimer(centerCameraTimer)
 
@@ -3846,6 +3895,8 @@ function StartNewBattle()
     DestroyGroup(leftUnitsGroup)
 
     ClearUpgradeFrames()
+
+    local prevLeftSideData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
@@ -3884,6 +3935,21 @@ function StartNewBattle()
 --        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
     until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
 
+    local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    if prevLeftSideData ~= leftSideUnitData then
+        ShowStatisticsFrame(prevLeftSideData.history, function()
+            DelayCallback(1.5, function()
+                HideStatisticsFrame(function()
+                    StartNewBattle()
+                end)
+            end)
+        end)
+    else
+        StartNewBattle()
+    end
+end
+
+function StartNewBattle()
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
     local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
@@ -3968,14 +4034,16 @@ function BattleUnitDyingTrgAction()
                     DelayCallback(1, function()
                         table.insert(loserUnitsData.history, {
                             enemy = winnerUnitsData,
-                            units_left = battleUnitsLeft[winnerSide]
+                            units_left = battleUnitsLeft[winnerSide],
+                            is_winner = false
                         })
                         table.insert(winnerUnitsData.history, {
                             enemy = loserUnitsData,
-                            units_left = battleUnitsLeft[loserSide]
+                            units_left = battleUnitsLeft[winnerSide],
+                            is_winner = true
                         })
                         isWinningFrameAppearing = false
-                        StartNewBattle()
+                        PrepareNewBattle()
                     end)
                 end)
             end)
@@ -4086,7 +4154,7 @@ OnInit.map(function()
 end)
 
 OnInit.final(function()
-    --StartNewBattle()
+    PrepareNewBattle()
 end)
 --CUSTOM_CODE
 function Trig_Untitled_Trigger_001_Conditions()

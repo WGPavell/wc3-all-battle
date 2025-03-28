@@ -65,7 +65,7 @@ function SimpleBaseFrame:new()
         local timer = CreateTimer()
         local ticks = 0
         local alphaPerTick = 255 / duration / 60
-        self:setVisible(true)
+        self:setAlpha(0):setVisible(true)
         TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
@@ -88,6 +88,7 @@ function SimpleBaseFrame:new()
         local timer = CreateTimer()
         local ticks = 0
         local alphaPerTick = 255 / duration / 60
+        self:setVisible(true):setAlpha(255)
         TimerStart(timer, 1 / 60, true, function()
             local newAlpha = math.floor(255 - alphaPerTick * ticks + 0.5)
             ticks = ticks + 1
@@ -252,6 +253,11 @@ function SimpleTextFrame:new(name, text, scale, parent, context)
     ---@param horizontalAlignment textaligntype
     function frame:setAlignment(verticalAlignment, horizontalAlignment)
         BlzFrameSetTextAlignment(self.handle, verticalAlignment, horizontalAlignment)
+        return self
+    end
+
+    function frame:setColor(r, g, b, a)
+        BlzFrameSetTextColor(self.handle, BlzConvertColor(a or 255, r, g, b))
         return self
     end
 
