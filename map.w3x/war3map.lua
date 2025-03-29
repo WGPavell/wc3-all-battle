@@ -3433,55 +3433,58 @@ OnInit.map(function()
         local unitsData = {}
         for _, code in ipairs(group.unit_codes) do
             local subject = CreateUnit(subjectPlayer, FourCC(code), 0, 0, 0)
+            ShowUnit(subject, false)
             if unitsUpgradesDependencies[code] ~= nil then
                 for _, upgrade in ipairs(unitsUpgradesDependencies[code]) do
                     SetPlayerTechResearched(subjectPlayer, FourCC(upgrade.code), GetPlayerTechMaxAllowed(subjectPlayer, FourCC(upgrade.code)))
                 end
             end
-            local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)
-            local attack1_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 0)
-            local attack1_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0)
-            local attack1_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0)) == ATTACK_TYPE_MAGIC
-            local attack2_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 1)
-            local attack2_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1)
-            local attack2_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 1)) == ATTACK_TYPE_MAGIC
-            local have_immune = false
-            for _, spellId in ipairs(SPELL_IMMUNE_ABILITIES) do
-                if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
-                    have_immune = true
-                    break
+            DelayCallback(0.01, function()
+                local targeted_as = BlzGetUnitIntegerField(subject, UNIT_IF_TARGETED_AS)
+                local attack1_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 0)
+                local attack1_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 0)
+                local attack1_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0)) == ATTACK_TYPE_MAGIC
+                local attack2_enabled = BlzGetUnitWeaponBooleanField(subject, UNIT_WEAPON_BF_ATTACKS_ENABLED, 1)
+                local attack2_targets = BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_TARGETS_ALLOWED, 1)
+                local attack2_magic = ConvertAttackType(BlzGetUnitWeaponIntegerField(subject, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 1)) == ATTACK_TYPE_MAGIC
+                local have_immune = false
+                for _, spellId in ipairs(SPELL_IMMUNE_ABILITIES) do
+                    if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
+                        have_immune = true
+                        break
+                    end
                 end
-            end
-            local have_anti_air = false
-            for _, spellId in ipairs(ANTI_AIR_ABILITIES) do
-                if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
-                    have_anti_air = true
-                    break
+                local have_anti_air = false
+                for _, spellId in ipairs(ANTI_AIR_ABILITIES) do
+                    if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
+                        have_anti_air = true
+                        break
+                    end
                 end
-            end
-            table.insert(unitsData, {
-                code = code,
-                name = BlzGetUnitStringField(subject, UNIT_SF_NAME),
-                is_hero = IsUnitType(subject, UNIT_TYPE_HERO),
-                food_cost = GetUnitFoodUsed(subject),
-                unit_target = {
-                    ground = targeted_as & TARGET_FLAG_GROUND_INT ~= 0,
-                    air = targeted_as & TARGET_FLAG_AIR_INT ~= 0,
-                    immune = have_immune
-                },
-                attack_target = {
-                    ground = (attack1_enabled and attack1_targets & TARGET_FLAG_GROUND_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_GROUND_INT ~= 0),
-                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0) or have_anti_air,
-                    magic = (attack1_enabled or attack2_enabled) and ((not attack1_enabled or (attack1_enabled and attack1_magic)) and (not attack2_enabled or (attack2_enabled and attack2_magic))),
-                },
-                icon = BlzGetAbilityIcon(FourCC(code)),
-                battles = 0,
-                victories = 0,
-                total_died = 0,
-                total_killed = 0,
-                history = {}
-            })
-            RemoveUnit(subject)
+                table.insert(unitsData, {
+                    code = code,
+                    name = BlzGetUnitStringField(subject, UNIT_SF_NAME),
+                    is_hero = IsUnitType(subject, UNIT_TYPE_HERO),
+                    food_cost = GetUnitFoodUsed(subject),
+                    unit_target = {
+                        ground = targeted_as & TARGET_FLAG_GROUND_INT ~= 0,
+                        air = targeted_as & TARGET_FLAG_AIR_INT ~= 0,
+                        immune = have_immune
+                    },
+                    attack_target = {
+                        ground = (attack1_enabled and attack1_targets & TARGET_FLAG_GROUND_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_GROUND_INT ~= 0),
+                        air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0) or have_anti_air,
+                        magic = (attack1_enabled or attack2_enabled) and ((not attack1_enabled or (attack1_enabled and attack1_magic)) and (not attack2_enabled or (attack2_enabled and attack2_magic))),
+                    },
+                    icon = BlzGetAbilityIcon(FourCC(code)),
+                    battles = 0,
+                    victories = 0,
+                    total_died = 0,
+                    total_killed = 0,
+                    history = {}
+                })
+                RemoveUnit(subject)
+            end)
         end
         table.insert(unitList, {
             id = group.id,
@@ -3518,6 +3521,8 @@ end
 function UpdateFullscreenCanvasSize()
     BlzFrameSetSize(fullscreenCanvasFrame.handle, GetScreenFrameWidth(), 0.6)
 end
+
+TEXT_BASE_SCALE_HEIGHT = 0.0092
 
 --- @type TextureFrame
 leftSideIconFrame = nil
@@ -3597,7 +3602,7 @@ totalBattlesStatisticsWrapperFrame = nil
 totalBattlesStatisticsRacesWrapperFrame = nil
 TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y = 0.01
 TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE = 2.5
-TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT = 0.0092 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT = TEXT_BASE_SCALE_HEIGHT * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
 TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM = 0.002 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
 
 TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH = 0.12
@@ -3609,6 +3614,29 @@ TOTAL_BATTLES_STATISTICS_APPEAR_DELAY = 0.1
 TOTAL_BATTLES_STATISTICS_FADING_IN_DURATION = 1
 
 totalBattlesStatisticsBattleListFrames = {}
+
+--- @type SimpleEmptyFrame
+totalBattlesStatisticsTopsWrapperFrame = nil
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SPACE_X = 0.04
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_TEXT_SCALE = 3
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_HEIGHT = TEXT_BASE_SCALE_HEIGHT * TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_MARGIN_BOTTOM = 0.002 * TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_TEXT_SCALE = 2.5
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_HEIGHT = TEXT_BASE_SCALE_HEIGHT * TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_MARGIN_BOTTOM = 0.0014 * TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_TOPS_INNER_COLUMN_SPACE_X = 0.02
+TOTAL_BATTLES_STATISTICS_TOPS_MAX_ROWS = 5
+
+TOTAL_BATTLES_STATISTICS_TOPS_ICON_FRAME_WIDTH = 0.12
+TOTAL_BATTLES_STATISTICS_TOPS_ICON_FRAME_HEIGHT = 0.027
+TOTAL_BATTLES_STATISTICS_TOPS_ICON_SPACE_Y_MIN = 0.0075
+TOTAL_BATTLES_STATISTICS_TOPS_ICON_TEXT_BASE_SCALE = 1.8
+TOTAL_BATTLES_STATISTICS_TOPS_APPEAR_DELAY = 0.1
+TOTAL_BATTLES_STATISTICS_TOPS_FADING_IN_DURATION = 1
+
+totalBattlesStatisticsTopsMainColumns = {"Войска", "Герои"}
+totalBattlesStatisticsTopsSubColumns = {"|cff00ff00Лучшие|r", "|cffff0000Худшие|r"}
+totalBattlesStatisticsTopsContainers = {}
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -3683,14 +3711,126 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
-        --:setVisible(false)
+        :setVisible(false)
     totalBattlesStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsWrapper", totalBattlesStatisticsBackdropFrame.cover.handle)
     totalBattlesStatisticsWrapperFrame
         :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_BOTTOM, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
+
     totalBattlesStatisticsRacesWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsRacesWrapper", totalBattlesStatisticsWrapperFrame.handle)
     totalBattlesStatisticsRacesWrapperFrame:setAllPoints(totalBattlesStatisticsWrapperFrame.handle):setVisible(false)
+
+
+    totalBattlesStatisticsTopsWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsTopsWrapper", totalBattlesStatisticsWrapperFrame.handle)
+    totalBattlesStatisticsTopsWrapperFrame:setAllPoints(totalBattlesStatisticsWrapperFrame.handle):setVisible(false)
+    totalBattlesStatisticsTopsSubColumns = { "|cff00ff00Лучшие|r", "|cffff0000Худшие|r"}
+    local containerWidth = (GetScreenFrameWidth() - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X * 2 - TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SPACE_X * (#totalBattlesStatisticsTopsMainColumns - 1)) / #totalBattlesStatisticsTopsMainColumns
+    local containerHeight = 0.6 - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y * 2 - TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y * 2
+    local subcontainerWidth = (containerWidth - TOTAL_BATTLES_STATISTICS_TOPS_INNER_COLUMN_SPACE_X * (#totalBattlesStatisticsTopsSubColumns - 1)) / #totalBattlesStatisticsTopsSubColumns
+    local subcontainerHeight = containerHeight - TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_HEIGHT - TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_MARGIN_BOTTOM
+    local iconFrameHeight = subcontainerWidth * 0.22
+    local unitListContainerHeight = subcontainerHeight - TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_HEIGHT - TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_MARGIN_BOTTOM
+    local iconFrameSpaceBetween = (unitListContainerHeight - (iconFrameHeight * TOTAL_BATTLES_STATISTICS_TOPS_MAX_ROWS)) / (TOTAL_BATTLES_STATISTICS_TOPS_MAX_ROWS - 1)
+
+    local topContainers = {}
+    for i, title in ipairs(totalBattlesStatisticsTopsMainColumns) do
+        local containerFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsTopContainer", totalBattlesStatisticsTopsWrapperFrame.handle, i)
+        local titleFrame = SimpleTextFrame:new("TotalBattlesStatisticsTopTitle", "|cffffcc00" .. title .. "|r", TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_TEXT_SCALE, containerFrame.handle, i)
+        containerFrame:setSize(containerWidth, 0)
+        titleFrame
+            :setRelativePoint(FRAMEPOINT_TOPLEFT, containerFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+            :setRelativePoint(FRAMEPOINT_TOPRIGHT, containerFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+            :setSize(0, TEXT_BASE_SCALE_HEIGHT)
+            :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+        if i == 1 then
+            containerFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsTopsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, totalBattlesStatisticsTopsWrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+        else
+            containerFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, topContainers[i - 1].container.handle, FRAMEPOINT_TOPRIGHT, TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SPACE_X, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, topContainers[i - 1].container.handle, FRAMEPOINT_BOTTOMRIGHT, TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SPACE_X, 0)
+        end
+        if i == #totalBattlesStatisticsTopsMainColumns then
+            containerFrame
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, totalBattlesStatisticsWrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+        end
+        local subContainers = {}
+        for j, subtitle in ipairs(totalBattlesStatisticsTopsSubColumns) do
+            local subcontainerFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsTopSubcontainer", containerFrame.handle, j)
+            local subtitleFrame = SimpleTextFrame:new("TotalBattlesStatisticsTopSubtitle", "|cffffcc00" .. subtitle .. "|r", TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_TEXT_SCALE, subcontainerFrame.handle, j)
+            local unitListContainerFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsTopUnitListContainer", subcontainerFrame.handle, j)
+            subcontainerFrame:setSize(subcontainerWidth, 0)
+            subtitleFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, subcontainerFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, subcontainerFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                :setSize(0, TEXT_BASE_SCALE_HEIGHT)
+                :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+            unitListContainerFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, subtitleFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, -TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_MARGIN_BOTTOM)
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, subtitleFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, subcontainerFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, subcontainerFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+            if j == 1 then
+                subcontainerFrame
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, titleFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, -TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_MARGIN_BOTTOM)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, containerFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+            else
+                subcontainerFrame
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, subContainers[j - 1].container.handle, FRAMEPOINT_TOPRIGHT, TOTAL_BATTLES_STATISTICS_TOPS_INNER_COLUMN_SPACE_X, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, subContainers[j - 1].container.handle, FRAMEPOINT_BOTTOMRIGHT, TOTAL_BATTLES_STATISTICS_TOPS_INNER_COLUMN_SPACE_X, 0)
+            end
+            if j == #totalBattlesStatisticsTopsSubColumns then
+                subcontainerFrame
+                    :setRelativePoint(FRAMEPOINT_TOPRIGHT, titleFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, -TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_TITLE_MARGIN_BOTTOM)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, containerFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+            end
+            local unitListContainers = {}
+            for k = 1, TOTAL_BATTLES_STATISTICS_TOPS_MAX_ROWS do
+                local wrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsTopUnitListContainerEntryWrapper", unitListContainerFrame.handle, k)
+                local iconFrame = TextureFrame:new("TotalBattlesStatisticsTopUnitListContainerEntryIcon", "", wrapperFrame.handle, k)
+                local textFrame = SimpleTextFrame:new("TotalBattlesStatisticsTopUnitListContainerEntryText", "", TOTAL_BATTLES_STATISTICS_TOPS_ICON_TEXT_BASE_SCALE * (iconFrameHeight / 0.06), wrapperFrame.handle, k)
+                wrapperFrame
+                    :setSize(0, iconFrameHeight)
+                iconFrame.cover
+                     :setSize(iconFrameHeight, iconFrameHeight)
+                     :setRelativePoint(FRAMEPOINT_TOPLEFT, wrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                     :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, wrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+                textFrame
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrame.cover.handle, FRAMEPOINT_TOPRIGHT, 0.0022 * TOTAL_BATTLES_STATISTICS_TOPS_ICON_TEXT_BASE_SCALE * (iconFrameHeight / 0.06), 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, iconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0.0022 * TOTAL_BATTLES_STATISTICS_TOPS_ICON_TEXT_BASE_SCALE * (iconFrameHeight / 0.06), 0)
+                    :setRelativePoint(FRAMEPOINT_TOPRIGHT, wrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, wrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+                    :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+                textFrame:setText("Чудесный дракончик\nПобед: 30/60 (50.00%)")
+                if k == 1 then
+                    wrapperFrame
+                        :setRelativePoint(FRAMEPOINT_TOPLEFT, unitListContainerFrame.handle, FRAMEPOINT_TOPLEFT, 0, -TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_MARGIN_BOTTOM)
+                        :setRelativePoint(FRAMEPOINT_TOPRIGHT, unitListContainerFrame.handle, FRAMEPOINT_TOPRIGHT, 0, -TOTAL_BATTLES_STATISTICS_TOPS_COLUMN_SUBTITLE_MARGIN_BOTTOM)
+                else
+                    wrapperFrame
+                        :setRelativePoint(FRAMEPOINT_TOPLEFT, unitListContainers[k - 1].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -iconFrameSpaceBetween)
+                        :setRelativePoint(FRAMEPOINT_TOPRIGHT, unitListContainers[k - 1].wrapper.handle, FRAMEPOINT_BOTTOMRIGHT, 0, -iconFrameSpaceBetween)
+                end
+                table.insert(unitListContainers, {
+                    wrapper = wrapperFrame,
+                    icon = iconFrame,
+                    text = textFrame
+                })
+            end
+            table.insert(subContainers, {
+                container = subcontainerFrame,
+                subContainers = unitListContainers
+            })
+        end
+        table.insert(topContainers, {
+            container = containerFrame,
+            subContainers = subContainers
+        })
+    end
+    totalBattlesStatisticsTopsContainers = topContainers
 
     BlzFrameClearAllPoints(mainFrame)
 end)
@@ -3888,6 +4028,30 @@ function ShowFinalRacesFrame(raceSummary)
     end
     totalBattlesStatisticsRacesWrapperFrame:animateFadeIn(1.5)
 end
+
+function ShowFinalTopsFrame(notHeroes, heroes)
+    local units = {notHeroes, heroes}
+    totalBattlesStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    for i, container in ipairs(totalBattlesStatisticsTopsContainers) do
+        for j, subcontainer in ipairs(container.subContainers) do
+            for k, unitListContainer in ipairs(subcontainer.subContainers) do
+                local unit = units[i][j][k]
+                if unit then
+                    unitListContainer.wrapper:setVisible(true)
+                    unitListContainer.icon:setTexture(unit.icon)
+                    local victoryPercentage = 0
+                    if unit.battles > 0 then
+                        victoryPercentage = unit.victories / unit.battles * 100
+                    end
+                    unitListContainer.text:setText(unit.name .. "\n" .. "Побед: " .. unit.victories .. "/" .. unit.battles .. " (" .. string.format("%.2f", victoryPercentage) .. "%)")
+                else
+                    unitListContainer.wrapper:setVisible(false)
+                end
+            end
+        end
+    end
+    totalBattlesStatisticsTopsWrapperFrame:animateFadeIn(1.5)
+end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
 --- Created by WGPavell.
@@ -3917,12 +4081,12 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 2,
-    unitIndex = 8
+    raceIndex = 4,
+    unitIndex = 13
 }
 rightSideSpawnData = {
-    raceIndex = 1,
-    unitIndex = 7
+    raceIndex = 4,
+    unitIndex = 13
 }
 
 sideFrames = nil
@@ -4019,7 +4183,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        --SetWidgetLife(unit, 1)
+        SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -4060,7 +4224,14 @@ function PrepareNewBattle()
 --                        debugPrint("No units left in race for left side, so switch to next race")
                         leftSideSpawnData.raceIndex = leftSideSpawnData.raceIndex + 1
                         if unitList[leftSideSpawnData.raceIndex] == nil then
---                            debugPrint("All battles done")
+                            --debugPrint("All battles done")
+                            ShowStatisticsFrame(prevLeftSideData.history, function()
+                                DelayCallback(5, function()
+                                    HideStatisticsFrame(function()
+                                        RunFinalStatisticsFrames()
+                                    end)
+                                end)
+                            end)
                             return
                         end
                         leftSideSpawnData.unitIndex = 1
@@ -4361,68 +4532,98 @@ OnInit.map(function()
     TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
 end)
 
-OnInit.final(function()
-    for _, leftRaceUnits in ipairs(unitList) do
-        for _, leftUnitData in ipairs(leftRaceUnits.units) do
-            for _, rightRaceUnits in ipairs(unitList) do
-                for _, rightUnitData in ipairs(rightRaceUnits.units) do
-                    if leftUnitData ~= rightUnitData then
-                        local pushEntry = true
-                        for _, history in ipairs(leftUnitData.history) do
-                            if rightUnitData == history.enemy then
-                                pushEntry = false
-                                break
-                            end
-                        end
-                        if pushEntry then
-                            local isWinner = math.random(1, 2) == 1
-                            local unitsLeft = math.random(1, 100)
-                            leftUnitData.battles = leftUnitData.battles + 1
-                            rightUnitData.battles = rightUnitData.battles + 1
-                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
-                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
-                            table.insert(leftUnitData.history, {
-                                enemy = rightUnitData,
-                                units_left = unitsLeft,
-                                is_winner = isWinner
-                            })
-                            table.insert(rightUnitData.history, {
-                                enemy = leftUnitData,
-                                units_left = unitsLeft,
-                                is_winner = not isWinner
-                            })
-                        end
-                    end
+function RunFinalStatisticsFrames()
+    for _, side in ipairs(sideFrames) do
+        side.icon.cover:animateFadeOut(0.75)
+        side.text:animateFadeOut(0.75)
+        side.statistics:animateFadeOut(0.75)
+    end
+    DelayCallback(0.5, function()
+        local flatUnitNotHeroList = {}
+        local flatUnitHeroList = {}
+        for _, raceUnits in ipairs(unitList) do
+            for _, unit in ipairs(raceUnits.units) do
+                local victoryPercentage = 0
+                if unit.battles > 0 then
+                    victoryPercentage = unit.victories / unit.battles
+                end
+                unit.victoryPercentage = victoryPercentage
+                if unit.is_hero then
+                    table.insert(flatUnitHeroList, unit)
+                else
+                    table.insert(flatUnitNotHeroList, unit)
                 end
             end
         end
-    end
-    ShowFinalRacesFrame(unitList)
-    local flatUnitNotHeroList = {}
-    local flatUnitHeroList = {}
-    for _, raceUnits in ipairs(unitList) do
-        for _, unit in ipairs(raceUnits.units) do
-            if unit.is_hero then
-                table.insert(flatUnitHeroList, unit)
-            else
-                table.insert(flatUnitNotHeroList, unit)
-            end
-        end
-    end
-    local topUnitHeroList = {table.unpack(flatUnitHeroList)}
-    table.sort(topUnitHeroList, function(a, b)
-        return a.victories > b.victories
+        local topUnitHeroList = {table.unpack(flatUnitHeroList)}
+        table.sort(topUnitHeroList, function(a, b)
+            return a.victoryPercentage > b.victoryPercentage
+        end)
+        topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
+        local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
+        table.sort(worstUnitHeroList, function(a, b)
+            return a.victoryPercentage < b.victoryPercentage
+        end)
+        worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
+        local topUnitNotHeroList = {table.unpack(flatUnitNotHeroList)}
+        table.sort(topUnitNotHeroList, function(a, b)
+            return a.victoryPercentage > b.victoryPercentage
+        end)
+        topUnitNotHeroList = {table.unpack(topUnitNotHeroList, 1, 5)}
+        local worstUnitNotHeroList = {table.unpack(flatUnitNotHeroList)}
+        table.sort(worstUnitNotHeroList, function(a, b)
+            return a.victoryPercentage < b.victoryPercentage
+        end)
+        worstUnitNotHeroList = {table.unpack(worstUnitNotHeroList, 1, 5)}
+        ShowFinalRacesFrame(unitList)
+        DelayCallback(15, function()
+            totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
+                ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+            end)
+        end)
     end)
-    topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
-    local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
-    table.sort(worstUnitHeroList, function(a, b)
-        return a.victories < b.victories
-    end)
-    worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
-    for _, unit in ipairs(worstUnitHeroList) do
-        debugPrint(unit.name)
-    end
-    --PrepareNewBattle()
+end
+
+OnInit.final(function()
+    --DelayCallback(0.1, function()
+    --    for _, leftRaceUnits in ipairs(unitList) do
+    --        for _, leftUnitData in ipairs(leftRaceUnits.units) do
+    --            for _, rightRaceUnits in ipairs(unitList) do
+    --                for _, rightUnitData in ipairs(rightRaceUnits.units) do
+    --                    if leftUnitData ~= rightUnitData then
+    --                        local pushEntry = true
+    --                        for _, history in ipairs(leftUnitData.history) do
+    --                            if rightUnitData == history.enemy then
+    --                                pushEntry = false
+    --                                break
+    --                            end
+    --                        end
+    --                        if pushEntry then
+    --                            local isWinner = math.random(1, 2) == 1
+    --                            local unitsLeft = math.random(1, 100)
+    --                            leftUnitData.battles = leftUnitData.battles + 1
+    --                            rightUnitData.battles = rightUnitData.battles + 1
+    --                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
+    --                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
+    --                            table.insert(leftUnitData.history, {
+    --                                enemy = rightUnitData,
+    --                                units_left = unitsLeft,
+    --                                is_winner = isWinner
+    --                            })
+    --                            table.insert(rightUnitData.history, {
+    --                                enemy = leftUnitData,
+    --                                units_left = unitsLeft,
+    --                                is_winner = not isWinner
+    --                            })
+    --                        end
+    --                    end
+    --                end
+    --            end
+    --        end
+    --    end
+    --    RunFinalStatisticsFrames()
+    --end)
+    DelayCallback(1, PrepareNewBattle)
 end)
 --CUSTOM_CODE
 function Trig_Untitled_Trigger_001_Conditions()

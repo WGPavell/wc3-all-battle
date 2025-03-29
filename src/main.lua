@@ -27,12 +27,12 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 2,
-    unitIndex = 8
+    raceIndex = 4,
+    unitIndex = 13
 }
 rightSideSpawnData = {
-    raceIndex = 1,
-    unitIndex = 7
+    raceIndex = 4,
+    unitIndex = 13
 }
 
 sideFrames = nil
@@ -129,7 +129,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        --SetWidgetLife(unit, 1)
+        SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -170,7 +170,14 @@ function PrepareNewBattle()
 --                        debugPrint("No units left in race for left side, so switch to next race")
                         leftSideSpawnData.raceIndex = leftSideSpawnData.raceIndex + 1
                         if unitList[leftSideSpawnData.raceIndex] == nil then
---                            debugPrint("All battles done")
+                            --debugPrint("All battles done")
+                            ShowStatisticsFrame(prevLeftSideData.history, function()
+                                DelayCallback(5, function()
+                                    HideStatisticsFrame(function()
+                                        RunFinalStatisticsFrames()
+                                    end)
+                                end)
+                            end)
                             return
                         end
                         leftSideSpawnData.unitIndex = 1
@@ -471,66 +478,96 @@ OnInit.map(function()
     TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
 end)
 
-OnInit.final(function()
-    for _, leftRaceUnits in ipairs(unitList) do
-        for _, leftUnitData in ipairs(leftRaceUnits.units) do
-            for _, rightRaceUnits in ipairs(unitList) do
-                for _, rightUnitData in ipairs(rightRaceUnits.units) do
-                    if leftUnitData ~= rightUnitData then
-                        local pushEntry = true
-                        for _, history in ipairs(leftUnitData.history) do
-                            if rightUnitData == history.enemy then
-                                pushEntry = false
-                                break
-                            end
-                        end
-                        if pushEntry then
-                            local isWinner = math.random(1, 2) == 1
-                            local unitsLeft = math.random(1, 100)
-                            leftUnitData.battles = leftUnitData.battles + 1
-                            rightUnitData.battles = rightUnitData.battles + 1
-                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
-                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
-                            table.insert(leftUnitData.history, {
-                                enemy = rightUnitData,
-                                units_left = unitsLeft,
-                                is_winner = isWinner
-                            })
-                            table.insert(rightUnitData.history, {
-                                enemy = leftUnitData,
-                                units_left = unitsLeft,
-                                is_winner = not isWinner
-                            })
-                        end
-                    end
+function RunFinalStatisticsFrames()
+    for _, side in ipairs(sideFrames) do
+        side.icon.cover:animateFadeOut(0.75)
+        side.text:animateFadeOut(0.75)
+        side.statistics:animateFadeOut(0.75)
+    end
+    DelayCallback(0.5, function()
+        local flatUnitNotHeroList = {}
+        local flatUnitHeroList = {}
+        for _, raceUnits in ipairs(unitList) do
+            for _, unit in ipairs(raceUnits.units) do
+                local victoryPercentage = 0
+                if unit.battles > 0 then
+                    victoryPercentage = unit.victories / unit.battles
+                end
+                unit.victoryPercentage = victoryPercentage
+                if unit.is_hero then
+                    table.insert(flatUnitHeroList, unit)
+                else
+                    table.insert(flatUnitNotHeroList, unit)
                 end
             end
         end
-    end
-    ShowFinalRacesFrame(unitList)
-    local flatUnitNotHeroList = {}
-    local flatUnitHeroList = {}
-    for _, raceUnits in ipairs(unitList) do
-        for _, unit in ipairs(raceUnits.units) do
-            if unit.is_hero then
-                table.insert(flatUnitHeroList, unit)
-            else
-                table.insert(flatUnitNotHeroList, unit)
-            end
-        end
-    end
-    local topUnitHeroList = {table.unpack(flatUnitHeroList)}
-    table.sort(topUnitHeroList, function(a, b)
-        return a.victories > b.victories
+        local topUnitHeroList = {table.unpack(flatUnitHeroList)}
+        table.sort(topUnitHeroList, function(a, b)
+            return a.victoryPercentage > b.victoryPercentage
+        end)
+        topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
+        local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
+        table.sort(worstUnitHeroList, function(a, b)
+            return a.victoryPercentage < b.victoryPercentage
+        end)
+        worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
+        local topUnitNotHeroList = {table.unpack(flatUnitNotHeroList)}
+        table.sort(topUnitNotHeroList, function(a, b)
+            return a.victoryPercentage > b.victoryPercentage
+        end)
+        topUnitNotHeroList = {table.unpack(topUnitNotHeroList, 1, 5)}
+        local worstUnitNotHeroList = {table.unpack(flatUnitNotHeroList)}
+        table.sort(worstUnitNotHeroList, function(a, b)
+            return a.victoryPercentage < b.victoryPercentage
+        end)
+        worstUnitNotHeroList = {table.unpack(worstUnitNotHeroList, 1, 5)}
+        ShowFinalRacesFrame(unitList)
+        DelayCallback(15, function()
+            totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
+                ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+            end)
+        end)
     end)
-    topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
-    local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
-    table.sort(worstUnitHeroList, function(a, b)
-        return a.victories < b.victories
-    end)
-    worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
-    for _, unit in ipairs(worstUnitHeroList) do
-        debugPrint(unit.name)
-    end
-    --PrepareNewBattle()
+end
+
+OnInit.final(function()
+    --DelayCallback(0.1, function()
+    --    for _, leftRaceUnits in ipairs(unitList) do
+    --        for _, leftUnitData in ipairs(leftRaceUnits.units) do
+    --            for _, rightRaceUnits in ipairs(unitList) do
+    --                for _, rightUnitData in ipairs(rightRaceUnits.units) do
+    --                    if leftUnitData ~= rightUnitData then
+    --                        local pushEntry = true
+    --                        for _, history in ipairs(leftUnitData.history) do
+    --                            if rightUnitData == history.enemy then
+    --                                pushEntry = false
+    --                                break
+    --                            end
+    --                        end
+    --                        if pushEntry then
+    --                            local isWinner = math.random(1, 2) == 1
+    --                            local unitsLeft = math.random(1, 100)
+    --                            leftUnitData.battles = leftUnitData.battles + 1
+    --                            rightUnitData.battles = rightUnitData.battles + 1
+    --                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
+    --                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
+    --                            table.insert(leftUnitData.history, {
+    --                                enemy = rightUnitData,
+    --                                units_left = unitsLeft,
+    --                                is_winner = isWinner
+    --                            })
+    --                            table.insert(rightUnitData.history, {
+    --                                enemy = leftUnitData,
+    --                                units_left = unitsLeft,
+    --                                is_winner = not isWinner
+    --                            })
+    --                        end
+    --                    end
+    --                end
+    --            end
+    --        end
+    --    end
+    --    RunFinalStatisticsFrames()
+    --end)
+    DelayCallback(1, PrepareNewBattle)
 end)
