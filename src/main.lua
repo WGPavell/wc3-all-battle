@@ -5,7 +5,7 @@
 ---
 
 FOOD_LIMIT = 100
-SPAWN_CENTER_DISTANCE = 1000
+SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
 SPAWN_RADIUS_HEIGHT = 1500
 SPAWN_LEFT = 1
@@ -16,20 +16,23 @@ battleUnitsLeft = {
     [SPAWN_RIGHT] = 0
 }
 
-battleUnitDyingTrg = nil
+battleUnitDefeatTrg = nil
+battleUnitHelperSummonTrg = nil
+battleUnitTemporaryDisableSpiritFormTrg = nil
 battleUnitsGroup = CreateGroup()
 sideGroups = {
     [SPAWN_LEFT] = CreateGroup(),
     [SPAWN_RIGHT] = CreateGroup()
 }
+sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 1,
-    unitIndex = 14
+    raceIndex = 2,
+    unitIndex = 8
 }
 rightSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 5
+    raceIndex = 1,
+    unitIndex = 7
 }
 
 sideFrames = nil
@@ -77,8 +80,8 @@ function CreateUnitStack(unitData, spawnSide)
     local forPlayer = Player(spawnSide == SPAWN_LEFT and 1 or 2)
     --local forPlayer = Player(0)
     local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
-    battleUnitsLeft[spawnSide] = unitsTotal
     --local unitsTotal = 1
+    battleUnitsLeft[spawnSide] = unitsTotal
 
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
@@ -105,7 +108,8 @@ function CreateUnitStack(unitData, spawnSide)
         --RemoveGuardPosition(unit)
         GroupAddUnit(battleUnitsGroup, unit)
         GroupAddUnit(sideGroups[spawnSide], unit)
-        TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
+        TriggerRegisterUnitEvent(battleUnitDefeatTrg, unit, EVENT_UNIT_DEATH)
+        TriggerRegisterUnitEvent(battleUnitDefeatTrg, unit, EVENT_UNIT_CHANGE_OWNER)
         table.insert(spawnedUnits, unit)
         if unitData.is_hero then
             SetHeroLevel(unit, 10, false)
@@ -125,7 +129,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        SetWidgetLife(unit, 1)
+        --SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -229,16 +233,22 @@ function StartNewBattle()
 end
 
 sideUnitsAttackRecycleTimer = CreateTimer()
-SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 5
+SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 2
+
+function IssueUnitAttackRandomTarget(whichUnit, unitSide)
+    if (GetUnitCurrentOrder(whichUnit) == 0) then
+        local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+        if targetUnit ~= nil then
+            IssuePointOrder(whichUnit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
+        end
+    end
+end
 
 function IssueSideUnitsAttackRecycle()
     for _, spawnSide in ipairs({SPAWN_LEFT, SPAWN_RIGHT}) do
         ForGroup(sideGroups[spawnSide], function()
             local unit = GetEnumUnit()
-            local targetUnit = GroupPickRandomUnit(sideGroups[spawnSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
-            if targetUnit ~= nil then
-                IssuePointOrder(unit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
-            end
+            IssueUnitAttackRandomTarget(unit, spawnSide)
         end)
     end
     TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
@@ -249,7 +259,7 @@ function FormatStatisticsTextFromData(unitData)
     if unitData.battles > 0 then
         victoryPercentage = unitData.victories / unitData.battles * 100
     end
-    return "Всего убито: " .. tostring(unitData.total_killed) .. "\nВсего умерло: " .. tostring(unitData.total_died) .. "\nВсего битв: " .. tostring(unitData.battles) .. "\nВсего побед: " .. tostring(unitData.victories) .. " (" .. string.format("%.2f", victoryPercentage) .. "%)"
+    return "Всего побеждено: " .. tostring(unitData.total_killed) .. "\nВсего потеряно: " .. tostring(unitData.total_died) .. "\nВсего битв: " .. tostring(unitData.battles) .. "\nВсего побед: " .. tostring(unitData.victories) .. " (" .. string.format("%.2f", victoryPercentage) .. "%)"
 end
 
 function UpdateStatisticsFrames()
@@ -259,16 +269,28 @@ function UpdateStatisticsFrames()
     sideFrames[SPAWN_RIGHT].statistics:setText(FormatStatisticsTextFromData(rightSideUnitsData))
 end
 
-function BattleUnitDyingTrgAction()
-    local unit = GetDyingUnit()
+function BattleUnitDefeatTrgAction()
+    local unit = GetTriggerUnit()
     local loserSide = unitsInBattle[unit]
     if loserSide == nil then return end
+    local winnerSide = loserSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT
     GroupRemoveUnit(sideGroups[loserSide], unit)
+    local isHelper = sideHelperUnits[unit]
+    if UnitAlive(unit) then
+        sideHelperUnits[unit] = true
+        unitsInBattle[unit] = winnerSide
+        GroupAddUnit(sideGroups[winnerSide], unit)
+        IssueUnitAttackRandomTarget(unit, winnerSide)
+    end
+    if isHelper then
+        sideHelperUnits[unit] = nil
+        unitsInBattle[unit] = nil
+        return
+    end
     battleUnitsLeft[loserSide] = battleUnitsLeft[loserSide] - 1
     sideFrames[loserSide].text:setText(tostring(battleUnitsLeft[loserSide]))
     local leftSideUnitsData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitsData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
-    local winnerSide = loserSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT
     local loserUnitsData = loserSide == SPAWN_LEFT and leftSideUnitsData or rightSideUnitsData
     local winnerUnitsData = loserSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
     loserUnitsData.total_died = loserUnitsData.total_died + 1
@@ -305,8 +327,41 @@ function BattleUnitDyingTrgAction()
             battleWinnerTextFrame:animateFadeIn(0.4)
         end)
     end
+    if not isHelper then
+        unitsInBattle[unit] = nil
+    end
     UpdateStatisticsFrames()
     --debugPrint("Left on side " .. unitSide .. ": " .. battleUnitsLeft[unitSide])
+end
+
+function BattleUnitSummonHelperAction()
+    local summonerUnit = GetSummoningUnit()
+    local unitSide = unitsInBattle[summonerUnit]
+    if unitSide == nil then return end
+    local summonedUnit = GetTriggerUnit()
+    if summonedUnit == nil then return end
+    sideHelperUnits[summonedUnit] = true
+    unitsInBattle[summonedUnit] = unitSide
+    GroupAddUnit(sideGroups[unitSide], summonedUnit)
+    DelayCallback(1, function()
+        IssueUnitAttackRandomTarget(summonedUnit, unitSide)
+    end)
+end
+
+function BattleUnitTemporaryDisableSpiritFormAction()
+    local unit = GetTriggerUnit()
+    local spellId = GetSpellAbilityId()
+    if GetUnitCurrentOrder(unit) == OrderId("uncorporealform") then
+        DelayCallback(10, function()
+            IssueImmediateOrder(unit, "corporealform")
+            BlzUnitDisableAbility(unit, spellId, true, false)
+            DelayCallback(15, function()
+                if UnitAlive(unit) then
+                    BlzUnitDisableAbility(unit, spellId, false, false)
+                end
+            end)
+        end)
+    end
 end
 
 centerCameraTimer = CreateTimer()
@@ -320,9 +375,9 @@ function CenterCameraOnGroups()
     local maxX = 0
     local minY = 0
     local maxY = 0
-    local totalX = 0.0
-    local totalY = 0.0
-    local totalUnits = 0
+    --local totalX = 0.0
+    --local totalY = 0.0
+    --local totalUnits = 0
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
             local unit = GetEnumUnit()
@@ -330,24 +385,25 @@ function CenterCameraOnGroups()
             maxX = math.max(maxX, GetUnitX(unit))
             minY = math.min(minY, GetUnitY(unit))
             maxY = math.max(maxY, GetUnitY(unit))
-            totalX = totalX + GetUnitX(unit)
-            totalY = totalY + GetUnitY(unit)
-            totalUnits = totalUnits + 1
+            --totalX = totalX + GetUnitX(unit)
+            --totalY = totalY + GetUnitY(unit)
+            --totalUnits = totalUnits + 1
         end)
     end
-    totalUnits = math.max(1, totalUnits)
-    local centerX = totalX / totalUnits
-    local centerY = totalY / totalUnits
+    --totalUnits = math.max(1, totalUnits)
+    --local centerX = totalX / totalUnits
+    --local centerY = totalY / totalUnits
+    local centerX = (maxX + minX) / 2
+    local centerY = (maxY + minY) / 2
     local width = maxX - minX
     local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
     local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
     local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
     local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
-    local distance = math.max(distanceWidth, distanceHeight) * 1.15
+    local distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
     CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
     CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
-    --PanCameraToTimedWithZ(totalX / totalUnits, totalY / totalUnits, math.max(math.abs(maxX - minX), math.abs(maxY - minY)) / 5, CENTER_CAMERA_DURATION)
 end
 
 OnInit.map(function()
@@ -401,11 +457,80 @@ OnInit.map(function()
     --    until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
     --end
 
-    battleUnitDyingTrg = CreateTrigger()
-    TriggerAddAction(battleUnitDyingTrg, BattleUnitDyingTrgAction)
+    battleUnitDefeatTrg = CreateTrigger()
+    TriggerAddAction(battleUnitDefeatTrg, BattleUnitDefeatTrgAction)
 
+    battleUnitHelperSummonTrg = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(battleUnitHelperSummonTrg, Player(1), EVENT_PLAYER_UNIT_SUMMON)
+    TriggerRegisterPlayerUnitEvent(battleUnitHelperSummonTrg, Player(2), EVENT_PLAYER_UNIT_SUMMON)
+    TriggerAddAction(battleUnitHelperSummonTrg, BattleUnitSummonHelperAction)
+
+    battleUnitTemporaryDisableSpiritFormTrg = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
 end)
 
 OnInit.final(function()
-    PrepareNewBattle()
+    for _, leftRaceUnits in ipairs(unitList) do
+        for _, leftUnitData in ipairs(leftRaceUnits.units) do
+            for _, rightRaceUnits in ipairs(unitList) do
+                for _, rightUnitData in ipairs(rightRaceUnits.units) do
+                    if leftUnitData ~= rightUnitData then
+                        local pushEntry = true
+                        for _, history in ipairs(leftUnitData.history) do
+                            if rightUnitData == history.enemy then
+                                pushEntry = false
+                                break
+                            end
+                        end
+                        if pushEntry then
+                            local isWinner = math.random(1, 2) == 1
+                            local unitsLeft = math.random(1, 100)
+                            leftUnitData.battles = leftUnitData.battles + 1
+                            rightUnitData.battles = rightUnitData.battles + 1
+                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
+                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
+                            table.insert(leftUnitData.history, {
+                                enemy = rightUnitData,
+                                units_left = unitsLeft,
+                                is_winner = isWinner
+                            })
+                            table.insert(rightUnitData.history, {
+                                enemy = leftUnitData,
+                                units_left = unitsLeft,
+                                is_winner = not isWinner
+                            })
+                        end
+                    end
+                end
+            end
+        end
+    end
+    ShowFinalRacesFrame(unitList)
+    local flatUnitNotHeroList = {}
+    local flatUnitHeroList = {}
+    for _, raceUnits in ipairs(unitList) do
+        for _, unit in ipairs(raceUnits.units) do
+            if unit.is_hero then
+                table.insert(flatUnitHeroList, unit)
+            else
+                table.insert(flatUnitNotHeroList, unit)
+            end
+        end
+    end
+    local topUnitHeroList = {table.unpack(flatUnitHeroList)}
+    table.sort(topUnitHeroList, function(a, b)
+        return a.victories > b.victories
+    end)
+    topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
+    local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
+    table.sort(worstUnitHeroList, function(a, b)
+        return a.victories < b.victories
+    end)
+    worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
+    for _, unit in ipairs(worstUnitHeroList) do
+        debugPrint(unit.name)
+    end
+    --PrepareNewBattle()
 end)

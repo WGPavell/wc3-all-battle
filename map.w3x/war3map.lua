@@ -2694,6 +2694,11 @@ function SimpleBaseFrame:new()
         return self
     end
 
+    function obj:setAllPoints(relative)
+        BlzFrameSetAllPoints(self.handle, relative)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -2819,7 +2824,7 @@ TextureFrame = {}
 function TextureFrame:new(namePrefix, texturePath, parent, context)
     local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
     local textureFrame = SimpleBackdropTextureFrame:new(namePrefix .. "_icon", texturePath, coverFrame.handle, context)
-    BlzFrameSetAllPoints(textureFrame.handle, coverFrame.handle)
+    textureFrame:setAllPoints(coverFrame.handle)
 
     local obj = {
         cover = coverFrame,
@@ -2912,7 +2917,7 @@ TemplateBackdropFrame = {}
 function TemplateBackdropFrame:new(namePrefix, template, parent, priority, context)
     local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
     local backdropFrame = SimpleTemplateFrame:new(template, coverFrame.handle, priority, context)
-    BlzFrameSetAllPoints(backdropFrame.handle, coverFrame.handle)
+    backdropFrame:setAllPoints(coverFrame.handle)
 
     local obj = {
         cover = coverFrame,
@@ -3398,6 +3403,7 @@ heroAbilities = {
 abilitiesIcons = {}
 
 SPELL_IMMUNE_ABILITIES = {'Amim', 'ACm2', 'ACm3', 'ACmi'}
+ANTI_AIR_ABILITIES = {'Aens', 'Aweb', 'ACen', 'ACwb'}
 
 unitsUpgradesDependencies = {}
 unitList = {}
@@ -3446,6 +3452,13 @@ OnInit.map(function()
                     break
                 end
             end
+            local have_anti_air = false
+            for _, spellId in ipairs(ANTI_AIR_ABILITIES) do
+                if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
+                    have_anti_air = true
+                    break
+                end
+            end
             table.insert(unitsData, {
                 code = code,
                 name = BlzGetUnitStringField(subject, UNIT_SF_NAME),
@@ -3458,7 +3471,7 @@ OnInit.map(function()
                 },
                 attack_target = {
                     ground = (attack1_enabled and attack1_targets & TARGET_FLAG_GROUND_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_GROUND_INT ~= 0),
-                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0),
+                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0) or have_anti_air,
                     magic = (attack1_enabled or attack2_enabled) and ((not attack1_enabled or (attack1_enabled and attack1_magic)) and (not attack2_enabled or (attack2_enabled and attack2_magic))),
                 },
                 icon = BlzGetAbilityIcon(FourCC(code)),
@@ -3560,12 +3573,42 @@ TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y = 0.025
 --- @type SimpleEmptyFrame
 totalUnitStatisticsWrapperFrame = nil
 
-TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH = 0.135
-TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT = 0.03
+TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH = 0.16
+TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT = 0.036
+TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN = 0.01
+TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
 TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.1
 TOTAL_UNIT_STATISTICS_FADING_IN_DURATION = 1
 
 totalUnitStatisticsBattleListFrames = {}
+
+
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X = 0.025
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y = 0.025
+--- @type TemplateBackdropFrame
+totalBattlesStatisticsBackdropFrame = nil
+
+TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X = 0.025
+TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y = 0.025
+--- @type SimpleEmptyFrame
+totalBattlesStatisticsWrapperFrame = nil
+
+--- @type SimpleEmptyFrame
+totalBattlesStatisticsRacesWrapperFrame = nil
+TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y = 0.01
+TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE = 2.5
+TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT = 0.0092 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
+TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM = 0.002 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
+
+TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH = 0.12
+TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT = 0.027
+TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN = 0.006
+TOTAL_BATTLES_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
+TOTAL_BATTLES_STATISTICS_ICON_TEXT_BASE_SCALE = 1.8
+TOTAL_BATTLES_STATISTICS_APPEAR_DELAY = 0.1
+TOTAL_BATTLES_STATISTICS_FADING_IN_DURATION = 1
+
+totalBattlesStatisticsBattleListFrames = {}
 
 OnInit.map(function()
     -- Hide all unnecessary frames
@@ -3634,6 +3677,21 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
 
+    totalBattlesStatisticsBackdropFrame = TemplateBackdropFrame:new("TotalBattlesStatisticsBackdrop", "EscMenuBackdrop", fullscreenWrapperFrame.handle)
+    totalBattlesStatisticsBackdropFrame.cover
+        :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X, -TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y)
+        --:setVisible(false)
+    totalBattlesStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsWrapper", totalBattlesStatisticsBackdropFrame.cover.handle)
+    totalBattlesStatisticsWrapperFrame
+        :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPRIGHT, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X, -TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalBattlesStatisticsBackdropFrame.cover.handle, FRAMEPOINT_BOTTOM, 0, TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_Y)
+    totalBattlesStatisticsRacesWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsRacesWrapper", totalBattlesStatisticsWrapperFrame.handle)
+    totalBattlesStatisticsRacesWrapperFrame:setAllPoints(totalBattlesStatisticsWrapperFrame.handle):setVisible(false)
+
     BlzFrameClearAllPoints(mainFrame)
 end)
 
@@ -3669,13 +3727,11 @@ function AppendUpgradeFrame(side)
 end
 
 function ShowStatisticsFrame(battles, onFinishCallback)
-    totalUnitStatisticsBackdropFrame.cover:setVisible(true)
+    totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
-    local iconFrameHorizontalSpaceBetween = 0.01
-    local iconFrameVerticalSpaceBetween = 0.0075
-    local iconFramesPerRow = math.floor((frameSpaceWidth + iconFrameHorizontalSpaceBetween) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH + iconFrameHorizontalSpaceBetween))
-    local iconFramesPerCol = math.floor((frameSpaceHeight + iconFrameVerticalSpaceBetween) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT + iconFrameVerticalSpaceBetween))
+    local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN))
+    local iconFramesPerCol = math.floor((frameSpaceHeight + TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT + TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN))
     local totalIconsWidth = iconFramesPerRow * TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH
     local totalIconsHeight = iconFramesPerCol * TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT
     local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
@@ -3745,6 +3801,93 @@ function HideStatisticsFrame(onFinishCallback)
         onFinishCallback()
     end)
 end
+
+function ShowFinalRacesFrame(raceSummary)
+    totalBattlesStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X * 2
+    local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN))
+    local totalIconsWidth = iconFramesPerRow * TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH
+    local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
+    for i, race in ipairs(raceSummary) do
+        local raceWrapperFrameHeight = TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT
+        local raceWrapperFrame
+        local raceTextFrame
+        local raceIcons
+        if totalBattlesStatisticsBattleListFrames[i] == nil then
+            raceWrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsRaceWrapper", totalBattlesStatisticsRacesWrapperFrame.handle, i)
+            raceTextFrame = SimpleTextFrame:new("TotalBattlesStatisticsRaceText", "", TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE, raceWrapperFrame.handle, i)
+            raceTextFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, raceWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+            raceIcons = {}
+            totalBattlesStatisticsBattleListFrames[i] = {
+                wrapper = raceWrapperFrame,
+                text = raceTextFrame,
+                icons = raceIcons
+            }
+        else
+            raceWrapperFrame = totalBattlesStatisticsBattleListFrames[i].wrapper
+            raceTextFrame = totalBattlesStatisticsBattleListFrames[i].text
+            raceIcons = totalBattlesStatisticsBattleListFrames[i].icons
+        end
+        raceTextFrame:setText("|cffffcc00" .. race.race .. "|r")
+        if i == 1 then
+            raceWrapperFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+        else
+            raceWrapperFrame
+                :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsBattleListFrames[i - 1].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y)
+                :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsBattleListFrames[i - 1].wrapper.handle, FRAMEPOINT_BOTTOMRIGHT, 0, -TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y)
+        end
+        for j, unit in ipairs(race.units) do
+            local wrapperFrame
+            local iconFrame
+            local textFrame
+            if raceIcons[j] == nil then
+                wrapperFrame = SimpleEmptyFrame:new("TotalBattlesStatisticsEntryWrapper", raceWrapperFrame.handle, j)
+                iconFrame = TextureFrame:new("TotalBattlesStatisticsEntryIcon", "", wrapperFrame.handle, j)
+                textFrame = SimpleTextFrame:new("TotalBattlesStatisticsEntryText", "", TOTAL_BATTLES_STATISTICS_ICON_TEXT_BASE_SCALE * (TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT / 0.06), wrapperFrame.handle, j)
+                wrapperFrame
+                    :setSize(TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH, TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT)
+                iconFrame.cover
+                    :setSize(TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT, TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT)
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, wrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, wrapperFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, 0)
+                textFrame
+                    :setRelativePoint(FRAMEPOINT_TOPLEFT, iconFrame.cover.handle, FRAMEPOINT_TOPRIGHT, 0.002, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, iconFrame.cover.handle, FRAMEPOINT_BOTTOMLEFT, 0.002, 0)
+                    :setRelativePoint(FRAMEPOINT_TOPRIGHT, wrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                    :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, wrapperFrame.handle, FRAMEPOINT_BOTTOMRIGHT, 0, 0)
+                    :setAlignment(TEXT_JUSTIFY_MIDDLE, TEXT_JUSTIFY_CENTER)
+                raceIcons[j] = {
+                    wrapper = wrapperFrame,
+                    icon = iconFrame,
+                    text = textFrame
+                }
+            else
+                wrapperFrame = raceIcons[j].wrapper
+                iconFrame = raceIcons[j].icon
+                textFrame = raceIcons[j].text
+            end
+            iconFrame:setTexture(unit.icon)
+            local victoryPercentage = 0
+            if unit.battles > 0 then
+                victoryPercentage = unit.victories / unit.battles * 100
+            end
+            textFrame:setText(unit.name .. "\n" .. "Побед: " .. unit.victories .. "/" .. unit.battles .. " (" .. string.format("%.2f", victoryPercentage) .. "%)")
+            if j == 1 then
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, raceTextFrame.handle, FRAMEPOINT_BOTTOMLEFT, 0, -TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM)
+                raceWrapperFrameHeight = raceWrapperFrameHeight + TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT + TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM
+            elseif (j - 1) % iconFramesPerRow == 0 then
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, raceIcons[j - iconFramesPerRow].wrapper.handle, FRAMEPOINT_BOTTOMLEFT, 0, -TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN)
+                raceWrapperFrameHeight = raceWrapperFrameHeight + TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT + TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN
+            else
+                wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, raceIcons[j - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
+            end
+        end
+        raceWrapperFrame:setSize(0, raceWrapperFrameHeight)
+    end
+    totalBattlesStatisticsRacesWrapperFrame:animateFadeIn(1.5)
+end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
 --- Created by WGPavell.
@@ -3752,7 +3895,7 @@ end
 ---
 
 FOOD_LIMIT = 100
-SPAWN_CENTER_DISTANCE = 1000
+SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
 SPAWN_RADIUS_HEIGHT = 1500
 SPAWN_LEFT = 1
@@ -3763,20 +3906,23 @@ battleUnitsLeft = {
     [SPAWN_RIGHT] = 0
 }
 
-battleUnitDyingTrg = nil
+battleUnitDefeatTrg = nil
+battleUnitHelperSummonTrg = nil
+battleUnitTemporaryDisableSpiritFormTrg = nil
 battleUnitsGroup = CreateGroup()
 sideGroups = {
     [SPAWN_LEFT] = CreateGroup(),
     [SPAWN_RIGHT] = CreateGroup()
 }
+sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 1,
-    unitIndex = 2
+    raceIndex = 2,
+    unitIndex = 8
 }
 rightSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 5
+    raceIndex = 1,
+    unitIndex = 7
 }
 
 sideFrames = nil
@@ -3824,8 +3970,8 @@ function CreateUnitStack(unitData, spawnSide)
     local forPlayer = Player(spawnSide == SPAWN_LEFT and 1 or 2)
     --local forPlayer = Player(0)
     local unitsTotal = math.floor(FOOD_LIMIT / unitData.food_cost)
-    battleUnitsLeft[spawnSide] = unitsTotal
     --local unitsTotal = 1
+    battleUnitsLeft[spawnSide] = unitsTotal
 
     sideFrames[spawnSide].icon:setTexture(unitData.icon)
     sideFrames[spawnSide].text:setText(tostring(unitsTotal))
@@ -3852,8 +3998,8 @@ function CreateUnitStack(unitData, spawnSide)
         --RemoveGuardPosition(unit)
         GroupAddUnit(battleUnitsGroup, unit)
         GroupAddUnit(sideGroups[spawnSide], unit)
-        SetWidgetLife(unit, 1)
-        TriggerRegisterUnitEvent(battleUnitDyingTrg, unit, EVENT_UNIT_DEATH)
+        TriggerRegisterUnitEvent(battleUnitDefeatTrg, unit, EVENT_UNIT_DEATH)
+        TriggerRegisterUnitEvent(battleUnitDefeatTrg, unit, EVENT_UNIT_CHANGE_OWNER)
         table.insert(spawnedUnits, unit)
         if unitData.is_hero then
             SetHeroLevel(unit, 10, false)
@@ -3873,6 +4019,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
+        --SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -3938,7 +4085,7 @@ function PrepareNewBattle()
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     if prevLeftSideData ~= leftSideUnitData then
         ShowStatisticsFrame(prevLeftSideData.history, function()
-            DelayCallback(1.5, function()
+            DelayCallback(5, function()
                 HideStatisticsFrame(function()
                     StartNewBattle()
                 end)
@@ -3976,16 +4123,22 @@ function StartNewBattle()
 end
 
 sideUnitsAttackRecycleTimer = CreateTimer()
-SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 5
+SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 2
+
+function IssueUnitAttackRandomTarget(whichUnit, unitSide)
+    if (GetUnitCurrentOrder(whichUnit) == 0) then
+        local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+        if targetUnit ~= nil then
+            IssuePointOrder(whichUnit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
+        end
+    end
+end
 
 function IssueSideUnitsAttackRecycle()
     for _, spawnSide in ipairs({SPAWN_LEFT, SPAWN_RIGHT}) do
         ForGroup(sideGroups[spawnSide], function()
             local unit = GetEnumUnit()
-            local targetUnit = GroupPickRandomUnit(sideGroups[spawnSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
-            if targetUnit ~= nil then
-                IssuePointOrder(unit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
-            end
+            IssueUnitAttackRandomTarget(unit, spawnSide)
         end)
     end
     TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
@@ -3996,7 +4149,7 @@ function FormatStatisticsTextFromData(unitData)
     if unitData.battles > 0 then
         victoryPercentage = unitData.victories / unitData.battles * 100
     end
-    return "Всего убито: " .. tostring(unitData.total_killed) .. "\nВсего умерло: " .. tostring(unitData.total_died) .. "\nВсего битв: " .. tostring(unitData.battles) .. "\nВсего побед: " .. tostring(unitData.victories) .. " (" .. string.format("%.2f", victoryPercentage) .. "%)"
+    return "Всего побеждено: " .. tostring(unitData.total_killed) .. "\nВсего потеряно: " .. tostring(unitData.total_died) .. "\nВсего битв: " .. tostring(unitData.battles) .. "\nВсего побед: " .. tostring(unitData.victories) .. " (" .. string.format("%.2f", victoryPercentage) .. "%)"
 end
 
 function UpdateStatisticsFrames()
@@ -4006,16 +4159,28 @@ function UpdateStatisticsFrames()
     sideFrames[SPAWN_RIGHT].statistics:setText(FormatStatisticsTextFromData(rightSideUnitsData))
 end
 
-function BattleUnitDyingTrgAction()
-    local unit = GetDyingUnit()
+function BattleUnitDefeatTrgAction()
+    local unit = GetTriggerUnit()
     local loserSide = unitsInBattle[unit]
     if loserSide == nil then return end
+    local winnerSide = loserSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT
     GroupRemoveUnit(sideGroups[loserSide], unit)
+    local isHelper = sideHelperUnits[unit]
+    if UnitAlive(unit) then
+        sideHelperUnits[unit] = true
+        unitsInBattle[unit] = winnerSide
+        GroupAddUnit(sideGroups[winnerSide], unit)
+        IssueUnitAttackRandomTarget(unit, winnerSide)
+    end
+    if isHelper then
+        sideHelperUnits[unit] = nil
+        unitsInBattle[unit] = nil
+        return
+    end
     battleUnitsLeft[loserSide] = battleUnitsLeft[loserSide] - 1
     sideFrames[loserSide].text:setText(tostring(battleUnitsLeft[loserSide]))
     local leftSideUnitsData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     local rightSideUnitsData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
-    local winnerSide = loserSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT
     local loserUnitsData = loserSide == SPAWN_LEFT and leftSideUnitsData or rightSideUnitsData
     local winnerUnitsData = loserSide == SPAWN_LEFT and rightSideUnitsData or leftSideUnitsData
     loserUnitsData.total_died = loserUnitsData.total_died + 1
@@ -4052,8 +4217,41 @@ function BattleUnitDyingTrgAction()
             battleWinnerTextFrame:animateFadeIn(0.4)
         end)
     end
+    if not isHelper then
+        unitsInBattle[unit] = nil
+    end
     UpdateStatisticsFrames()
     --debugPrint("Left on side " .. unitSide .. ": " .. battleUnitsLeft[unitSide])
+end
+
+function BattleUnitSummonHelperAction()
+    local summonerUnit = GetSummoningUnit()
+    local unitSide = unitsInBattle[summonerUnit]
+    if unitSide == nil then return end
+    local summonedUnit = GetTriggerUnit()
+    if summonedUnit == nil then return end
+    sideHelperUnits[summonedUnit] = true
+    unitsInBattle[summonedUnit] = unitSide
+    GroupAddUnit(sideGroups[unitSide], summonedUnit)
+    DelayCallback(1, function()
+        IssueUnitAttackRandomTarget(summonedUnit, unitSide)
+    end)
+end
+
+function BattleUnitTemporaryDisableSpiritFormAction()
+    local unit = GetTriggerUnit()
+    local spellId = GetSpellAbilityId()
+    if GetUnitCurrentOrder(unit) == OrderId("uncorporealform") then
+        DelayCallback(10, function()
+            IssueImmediateOrder(unit, "corporealform")
+            BlzUnitDisableAbility(unit, spellId, true, false)
+            DelayCallback(15, function()
+                if UnitAlive(unit) then
+                    BlzUnitDisableAbility(unit, spellId, false, false)
+                end
+            end)
+        end)
+    end
 end
 
 centerCameraTimer = CreateTimer()
@@ -4067,9 +4265,9 @@ function CenterCameraOnGroups()
     local maxX = 0
     local minY = 0
     local maxY = 0
-    local totalX = 0.0
-    local totalY = 0.0
-    local totalUnits = 0
+    --local totalX = 0.0
+    --local totalY = 0.0
+    --local totalUnits = 0
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
             local unit = GetEnumUnit()
@@ -4077,24 +4275,25 @@ function CenterCameraOnGroups()
             maxX = math.max(maxX, GetUnitX(unit))
             minY = math.min(minY, GetUnitY(unit))
             maxY = math.max(maxY, GetUnitY(unit))
-            totalX = totalX + GetUnitX(unit)
-            totalY = totalY + GetUnitY(unit)
-            totalUnits = totalUnits + 1
+            --totalX = totalX + GetUnitX(unit)
+            --totalY = totalY + GetUnitY(unit)
+            --totalUnits = totalUnits + 1
         end)
     end
-    totalUnits = math.max(1, totalUnits)
-    local centerX = totalX / totalUnits
-    local centerY = totalY / totalUnits
+    --totalUnits = math.max(1, totalUnits)
+    --local centerX = totalX / totalUnits
+    --local centerY = totalY / totalUnits
+    local centerX = (maxX + minX) / 2
+    local centerY = (maxY + minY) / 2
     local width = maxX - minX
     local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
     local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
     local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
     local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
-    local distance = math.max(distanceWidth, distanceHeight) * 1.15
+    local distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
     CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
     CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
-    --PanCameraToTimedWithZ(totalX / totalUnits, totalY / totalUnits, math.max(math.abs(maxX - minX), math.abs(maxY - minY)) / 5, CENTER_CAMERA_DURATION)
 end
 
 OnInit.map(function()
@@ -4148,13 +4347,82 @@ OnInit.map(function()
     --    until prevLevel == GetUnitAbilityLevel(unit, FourCC(ability))
     --end
 
-    battleUnitDyingTrg = CreateTrigger()
-    TriggerAddAction(battleUnitDyingTrg, BattleUnitDyingTrgAction)
+    battleUnitDefeatTrg = CreateTrigger()
+    TriggerAddAction(battleUnitDefeatTrg, BattleUnitDefeatTrgAction)
 
+    battleUnitHelperSummonTrg = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(battleUnitHelperSummonTrg, Player(1), EVENT_PLAYER_UNIT_SUMMON)
+    TriggerRegisterPlayerUnitEvent(battleUnitHelperSummonTrg, Player(2), EVENT_PLAYER_UNIT_SUMMON)
+    TriggerAddAction(battleUnitHelperSummonTrg, BattleUnitSummonHelperAction)
+
+    battleUnitTemporaryDisableSpiritFormTrg = CreateTrigger()
+    TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
+    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
 end)
 
 OnInit.final(function()
-    PrepareNewBattle()
+    for _, leftRaceUnits in ipairs(unitList) do
+        for _, leftUnitData in ipairs(leftRaceUnits.units) do
+            for _, rightRaceUnits in ipairs(unitList) do
+                for _, rightUnitData in ipairs(rightRaceUnits.units) do
+                    if leftUnitData ~= rightUnitData then
+                        local pushEntry = true
+                        for _, history in ipairs(leftUnitData.history) do
+                            if rightUnitData == history.enemy then
+                                pushEntry = false
+                                break
+                            end
+                        end
+                        if pushEntry then
+                            local isWinner = math.random(1, 2) == 1
+                            local unitsLeft = math.random(1, 100)
+                            leftUnitData.battles = leftUnitData.battles + 1
+                            rightUnitData.battles = rightUnitData.battles + 1
+                            leftUnitData.victories = leftUnitData.victories + (isWinner and 1 or 0)
+                            rightUnitData.victories = rightUnitData.victories + (not isWinner and 1 or 0)
+                            table.insert(leftUnitData.history, {
+                                enemy = rightUnitData,
+                                units_left = unitsLeft,
+                                is_winner = isWinner
+                            })
+                            table.insert(rightUnitData.history, {
+                                enemy = leftUnitData,
+                                units_left = unitsLeft,
+                                is_winner = not isWinner
+                            })
+                        end
+                    end
+                end
+            end
+        end
+    end
+    ShowFinalRacesFrame(unitList)
+    local flatUnitNotHeroList = {}
+    local flatUnitHeroList = {}
+    for _, raceUnits in ipairs(unitList) do
+        for _, unit in ipairs(raceUnits.units) do
+            if unit.is_hero then
+                table.insert(flatUnitHeroList, unit)
+            else
+                table.insert(flatUnitNotHeroList, unit)
+            end
+        end
+    end
+    local topUnitHeroList = {table.unpack(flatUnitHeroList)}
+    table.sort(topUnitHeroList, function(a, b)
+        return a.victories > b.victories
+    end)
+    topUnitHeroList = {table.unpack(topUnitHeroList, 1, 5)}
+    local worstUnitHeroList = {table.unpack(flatUnitHeroList)}
+    table.sort(worstUnitHeroList, function(a, b)
+        return a.victories < b.victories
+    end)
+    worstUnitHeroList = {table.unpack(worstUnitHeroList, 1, 5)}
+    for _, unit in ipairs(worstUnitHeroList) do
+        debugPrint(unit.name)
+    end
+    --PrepareNewBattle()
 end)
 --CUSTOM_CODE
 function Trig_Untitled_Trigger_001_Conditions()

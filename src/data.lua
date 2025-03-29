@@ -385,6 +385,7 @@ heroAbilities = {
 abilitiesIcons = {}
 
 SPELL_IMMUNE_ABILITIES = {'Amim', 'ACm2', 'ACm3', 'ACmi'}
+ANTI_AIR_ABILITIES = {'Aens', 'Aweb', 'ACen', 'ACwb'}
 
 unitsUpgradesDependencies = {}
 unitList = {}
@@ -433,6 +434,13 @@ OnInit.map(function()
                     break
                 end
             end
+            local have_anti_air = false
+            for _, spellId in ipairs(ANTI_AIR_ABILITIES) do
+                if GetUnitAbilityLevel(subject, FourCC(spellId)) > 0 then
+                    have_anti_air = true
+                    break
+                end
+            end
             table.insert(unitsData, {
                 code = code,
                 name = BlzGetUnitStringField(subject, UNIT_SF_NAME),
@@ -445,7 +453,7 @@ OnInit.map(function()
                 },
                 attack_target = {
                     ground = (attack1_enabled and attack1_targets & TARGET_FLAG_GROUND_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_GROUND_INT ~= 0),
-                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0),
+                    air = (attack1_enabled and attack1_targets & TARGET_FLAG_AIR_INT ~= 0) or (attack2_enabled and attack2_targets & TARGET_FLAG_AIR_INT ~= 0) or have_anti_air,
                     magic = (attack1_enabled or attack2_enabled) and ((not attack1_enabled or (attack1_enabled and attack1_magic)) and (not attack2_enabled or (attack2_enabled and attack2_magic))),
                 },
                 icon = BlzGetAbilityIcon(FourCC(code)),

@@ -152,6 +152,11 @@ function SimpleBaseFrame:new()
         return self
     end
 
+    function obj:setAllPoints(relative)
+        BlzFrameSetAllPoints(self.handle, relative)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -277,7 +282,7 @@ TextureFrame = {}
 function TextureFrame:new(namePrefix, texturePath, parent, context)
     local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
     local textureFrame = SimpleBackdropTextureFrame:new(namePrefix .. "_icon", texturePath, coverFrame.handle, context)
-    BlzFrameSetAllPoints(textureFrame.handle, coverFrame.handle)
+    textureFrame:setAllPoints(coverFrame.handle)
 
     local obj = {
         cover = coverFrame,
@@ -370,7 +375,7 @@ TemplateBackdropFrame = {}
 function TemplateBackdropFrame:new(namePrefix, template, parent, priority, context)
     local coverFrame = SimpleEmptyFrame:new(namePrefix .. "_cover", parent, context)
     local backdropFrame = SimpleTemplateFrame:new(template, coverFrame.handle, priority, context)
-    BlzFrameSetAllPoints(backdropFrame.handle, coverFrame.handle)
+    backdropFrame:setAllPoints(coverFrame.handle)
 
     local obj = {
         cover = coverFrame,
