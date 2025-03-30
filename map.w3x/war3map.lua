@@ -1,36 +1,49 @@
 gg_cam_Camera_001 = nil
 gg_cam_Camera_002 = nil
+gg_snd_QuestCompleted = nil
+gg_snd_QuestCheckpoint = nil
 gg_trg_Untitled_Trigger_001 = nil
 function InitGlobals()
 end
 
+function InitSounds()
+    gg_snd_QuestCompleted = CreateSound("Sound/Interface/QuestCompleted.flac", false, false, false, 0, 0, "DefaultEAXON")
+    SetSoundParamsFromLabel(gg_snd_QuestCompleted, "QuestCompleted")
+    SetSoundDuration(gg_snd_QuestCompleted, 5154)
+    SetSoundVolume(gg_snd_QuestCompleted, 80)
+    gg_snd_QuestCheckpoint = CreateSound("UI/Feedback/CheckpointPopup/QuestCheckpoint.flac", false, false, false, 0, 0, "DefaultEAXON")
+    SetSoundParamsFromLabel(gg_snd_QuestCheckpoint, "QuestCheckpoint")
+    SetSoundDuration(gg_snd_QuestCheckpoint, 5154)
+    SetSoundVolume(gg_snd_QuestCheckpoint, 64)
+end
+
 function CreateCameras()
-gg_cam_Camera_001 = CreateCameraSetup()
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_TARGET_DISTANCE, 3000.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROLL, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FARZ, 5000.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_NEARZ, 16.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-CameraSetupSetDestPosition(gg_cam_Camera_001, 1149.4, -39.0, 0.0)
-gg_cam_Camera_002 = CreateCameraSetup()
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_TARGET_DISTANCE, 1399.5, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROLL, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FARZ, 5000.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_NEARZ, 16.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-CameraSetupSetDestPosition(gg_cam_Camera_002, 1149.4, -39.0, 0.0)
+    gg_cam_Camera_001 = CreateCameraSetup()
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROTATION, 90.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_TARGET_DISTANCE, 3000.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROLL, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FARZ, 5000.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_NEARZ, 16.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
+    CameraSetupSetDestPosition(gg_cam_Camera_001, 1149.4, -39.0, 0.0)
+    gg_cam_Camera_002 = CreateCameraSetup()
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROTATION, 90.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_TARGET_DISTANCE, 1399.5, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROLL, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FARZ, 5000.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_NEARZ, 16.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
+    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
+    CameraSetupSetDestPosition(gg_cam_Camera_002, 1149.4, -39.0, 0.0)
 end
 
 --CUSTOM_CODE
@@ -2901,6 +2914,16 @@ function UpgradeDataFrame:new(namePrefix, iconPath, text, textScale, textAlignme
         return self
     end
 
+    function obj:animateFadeIn(duration, callback)
+        self.cover:animateFadeIn(duration, callback)
+        return self
+    end
+
+    function obj:animateFadeOut(duration, callback)
+        self.cover:animateFadeOut(duration, callback)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -3016,6 +3039,16 @@ end
 function DelayCallback(timeout, callback)
     TimerStart(CreateTimer(), timeout, false, callback)
 end
+
+---PlayInterfaceSound
+---@param fileName string
+---@param volume integer
+function PlayInterfaceSound(fileName, volume)
+    local sound = CreateSound(fileName, false, false, false, 0, 0, "DefaultEAXON")
+    SetSoundVolume(sound, volume or 127)
+    StartSound(sound)
+    KillSoundWhenDone(sound)
+end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
 --- Created by WGPavell.
@@ -3064,7 +3097,7 @@ unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'hpea', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'hpea', 'hmil', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
@@ -3074,12 +3107,17 @@ unitGroups = {
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
         race_key = "KEY_NIGHTELF",
         unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
+    },
+    {
+        id = "neutral",
+        race_key = "KEY_NEUTRAL",
+        unit_codes = {'Nalc', 'Nngs', 'Ntin', 'Nplh', 'Nbst', 'Nfir', 'Nbrn', 'Npbm'}
     },
 }
 
@@ -3090,11 +3128,7 @@ upgrades = {
     },
     {
         code = 'Rhme',
-        units = {'hdhw', 'hfoo', 'hgry', 'hkni', 'hspt'}
-    },
-    {
-        code = 'Rguv',
-        units = {'hdhw', 'hfoo', 'hgry', 'hgyr', 'hkni', 'hmpr', 'hmtm', 'hmtt', 'hpea', 'hrif', 'hsor', 'hspt', 'ocat', 'odoc', 'ogru', 'ohun', 'okod', 'opeo', 'orai', 'oshm', 'ospw', 'otau', 'otbr', 'owyv', 'uabo', 'uaco', 'uban', 'ucry', 'ufro', 'ugar', 'ugho', 'umtw', 'unec', 'uobs'}
+        units = {'hdhw', 'hfoo', 'hgry', 'hkni', 'hmil', 'hspt'}
     },
     {
         code = 'Rhan',
@@ -3106,15 +3140,11 @@ upgrades = {
     },
     {
         code = 'Rhar',
-        units = {'hfoo', 'hgyr', 'hkni', 'hmtt', 'hspt'}
+        units = {'hfoo', 'hgyr', 'hkni', 'hmil', 'hmtt', 'hspt'}
     },
     {
         code = 'Rhde',
         units = {'hfoo'}
-    },
-    {
-        code = 'Rhpm',
-        units = {'hfoo', 'hkni', 'hmpr', 'hrif', 'hsor', 'hspt'}
     },
     {
         code = 'Rhhb',
@@ -3193,10 +3223,6 @@ upgrades = {
         units = {'odoc', 'ohun', 'otbr'}
     },
     {
-        code = 'Ropm',
-        units = {'odoc', 'ogru', 'ohun', 'orai', 'oshm', 'ospw', 'otau'}
-    },
-    {
         code = 'Rome',
         units = {'ogru', 'orai', 'otau'}
     },
@@ -3255,10 +3281,6 @@ upgrades = {
     {
         code = 'Remk',
         units = {'earc', 'ehpr'}
-    },
-    {
-        code = 'Repm',
-        units = {'earc', 'edoc', 'edot', 'edry', 'emtg', 'esen'}
     },
     {
         code = 'Repb',
@@ -3329,10 +3351,6 @@ upgrades = {
         units = {'uabo', 'umtw'}
     },
     {
-        code = 'Rupm',
-        units = {'uabo', 'uban', 'ucry', 'ugho', 'unec'}
-    },
-    {
         code = 'Ruac',
         units = {'uabo', 'ugho'}
     },
@@ -3342,11 +3360,15 @@ upgrades = {
     },
     {
         code = 'Rura',
-        units = {'ucry', 'ufro', 'ugar'}
+        units = {'ubsp', 'ucry', 'ufro', 'ugar'}
     },
     {
         code = 'Rucr',
-        units = {'ucry', 'ufro', 'ugar'}
+        units = {'ubsp', 'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Rusp',
+        units = {'ubsp', 'uobs'}
     },
     {
         code = 'Ruwb',
@@ -3375,10 +3397,6 @@ upgrades = {
     {
         code = 'Rusm',
         units = {'unec'}
-    },
-    {
-        code = 'Rusp',
-        units = {'uobs'}
     }
 }
 
@@ -3398,7 +3416,15 @@ heroAbilities = {
     Ucrl = {'AUim', 'AUts', 'AUcb', 'AUls'},
     Udea = {'AUdc', 'AUdp', 'AUau', 'AUan'},
     Udre = {'AUav', 'AUsl', 'AUcs', 'AUin'},
-    Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'}
+    Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'},
+    Nbrn = {'ANsi', 'ANba', 'ANdr', 'ANch'},
+    Nbst = {'ANsg', 'ANsq', 'ANsw', 'ANst'},
+    Nngs = {'ANfl', 'ANfa', 'ANms', 'ANto'},
+    Npbm = {'ANbf', 'ANdh', 'ANdb', 'ANef'},
+    Nalc = {'ANhs', 'ANab', 'ANcr', 'ANtm'},
+    Ntin = {'ANsy', 'ANcs', 'ANrg', 'ANeg'},
+    Nplh = {'ANrf', 'ANht', 'ANca', 'ANdo'},
+    Nfir = {'ANia', 'ANso', 'ANlm', 'ANvc'}
 }
 abilitiesIcons = {}
 
@@ -3582,14 +3608,14 @@ TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH = 0.16
 TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT = 0.036
 TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN = 0.01
 TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
-TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.1
+TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.2
 TOTAL_UNIT_STATISTICS_FADING_IN_DURATION = 1
 
 totalUnitStatisticsBattleListFrames = {}
 
 
-TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X = 0.025
-TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y = 0.025
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X = 0.015
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y = 0.015
 --- @type TemplateBackdropFrame
 totalBattlesStatisticsBackdropFrame = nil
 
@@ -3606,9 +3632,9 @@ TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT = TEXT_BASE_SCALE_HEIGHT * TOTAL_BATTL
 TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM = 0.002 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
 
 TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH = 0.12
-TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT = 0.027
+TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT = 0.0265
 TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN = 0.006
-TOTAL_BATTLES_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
+TOTAL_BATTLES_STATISTICS_ICON_SPACE_Y_MIN = 0.005
 TOTAL_BATTLES_STATISTICS_ICON_TEXT_BASE_SCALE = 1.8
 TOTAL_BATTLES_STATISTICS_APPEAR_DELAY = 0.1
 TOTAL_BATTLES_STATISTICS_FADING_IN_DURATION = 1
@@ -3659,18 +3685,18 @@ OnInit.map(function()
     BlzFrameSetAbsPoint(fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0.4, 0)
 
     leftSideIconFrame = TextureFrame:new("LeftSideIcon", "", fullscreenWrapperFrame.handle)
-    leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
+    leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03):setVisible(false)
     leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
-    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
+    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0):setVisible(false)
     leftSideStatisticsTextFrame = SimpleTextFrame:new("LeftSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
-    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT)
+    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT):setVisible(false)
 
     rightSideIconFrame = TextureFrame:new("RightSideIcon", "", fullscreenWrapperFrame.handle)
-    rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
+    rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03):setVisible(false)
     rightSideTextFrame = SimpleTextFrame:new("RightSideText", "0", 2, fullscreenWrapperFrame.handle)
-    rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0)
+    rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0):setVisible(false)
     rightSideStatisticsTextFrame = SimpleTextFrame:new("RightSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
-    rightSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideTextFrame.handle, FRAMEPOINT_LEFT, -0.01, 0):setRelativePoint(FRAMEPOINT_TOP, rightSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_RIGHT)
+    rightSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideTextFrame.handle, FRAMEPOINT_LEFT, -0.01, 0):setRelativePoint(FRAMEPOINT_TOP, rightSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_RIGHT):setVisible(false)
 
     battleInfoWrapperFrame = SimpleTypeFrame:new("BattleInfoWrapper", "SPRITE", fullscreenWrapperFrame.handle, "", 0)
     battleInfoWrapperFrame:setSize(0.3, 0):setRelativePoint(FRAMEPOINT_TOP, fullscreenCanvasFrame.handle, FRAMEPOINT_TOP, 0, 0):setRelativePoint(FRAMEPOINT_BOTTOM, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0, 0)
@@ -3868,6 +3894,7 @@ end
 
 function ShowStatisticsFrame(battles, onFinishCallback)
     totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    PlayInterfaceSound(SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
     local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN))
@@ -3914,8 +3941,13 @@ function ShowStatisticsFrame(battles, onFinishCallback)
             if i == 1 then
                 wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
             elseif (i - 1) % iconFramesPerRow == 0 then
-                if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
+                if math.floor((i - 1) / iconFramesPerRow) > (iconFramesPerCol - 1) then
                     for j = i - (iconFramesPerRow * iconFramesPerCol), i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow - 1 do
+                        --debugPrintAny(i)
+                        --debugPrintAny(iconFramesPerRow)
+                        --debugPrintAny(iconFramesPerCol)
+                        --debugPrintAny((i - 1) / iconFramesPerRow)
+                        --debugPrintAny(j)
                         totalUnitStatisticsBattleListFrames[j].wrapper:setVisible(false):resetPoints()
                     end
                     totalUnitStatisticsBattleListFrames[i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow].wrapper:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
@@ -3924,6 +3956,9 @@ function ShowStatisticsFrame(battles, onFinishCallback)
             else
                 wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBattleListFrames[i - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
             end
+            DelayCallback(TOTAL_UNIT_STATISTICS_FADING_IN_DURATION / 2, function()
+                PlayInterfaceSound(SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR, 90)
+            end)
             wrapperFrame:animateFadeIn(TOTAL_UNIT_STATISTICS_FADING_IN_DURATION, function()
                 if i >= #battles then
                     onFinishCallback()
@@ -3942,9 +3977,10 @@ function HideStatisticsFrame(onFinishCallback)
     end)
 end
 
-function ShowFinalRacesFrame(raceSummary)
+function ShowFinalRacesFrame(raceSummary, onFinishCallback)
     totalBattlesStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X * 2
+    local frameSpaceHeight = 0.6 - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y * 2 - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y * 2
     local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN))
     local totalIconsWidth = iconFramesPerRow * TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH
     local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
@@ -3961,13 +3997,14 @@ function ShowFinalRacesFrame(raceSummary)
             totalBattlesStatisticsBattleListFrames[i] = {
                 wrapper = raceWrapperFrame,
                 text = raceTextFrame,
-                icons = raceIcons
+                icons = raceIcons,
             }
         else
             raceWrapperFrame = totalBattlesStatisticsBattleListFrames[i].wrapper
             raceTextFrame = totalBattlesStatisticsBattleListFrames[i].text
             raceIcons = totalBattlesStatisticsBattleListFrames[i].icons
         end
+        raceWrapperFrame:setVisible(false)
         raceTextFrame:setText("|cffffcc00" .. race.race .. "|r")
         if i == 1 then
             raceWrapperFrame
@@ -4025,8 +4062,35 @@ function ShowFinalRacesFrame(raceSummary)
             end
         end
         raceWrapperFrame:setSize(0, raceWrapperFrameHeight)
+        totalBattlesStatisticsBattleListFrames[i].height = raceWrapperFrameHeight
     end
+    PlayInterfaceSound(SOUND_INTERFACE_ALL_BATTLES_COMPLETED)
     totalBattlesStatisticsRacesWrapperFrame:animateFadeIn(1.5)
+    DelayCallback(0.9, function()
+        local bufferHeight = 0
+        local firstRaceFramesIndex = 1
+        for i, raceFrames in ipairs(totalBattlesStatisticsBattleListFrames) do
+            DelayCallback((i - 1) * 3, function()
+                bufferHeight = bufferHeight + raceFrames.height
+                if bufferHeight > frameSpaceHeight then
+                    repeat
+                        local needlessRaceFrames = totalBattlesStatisticsBattleListFrames[firstRaceFramesIndex]
+                        needlessRaceFrames.wrapper:setVisible(false):resetPoints()
+                        bufferHeight = bufferHeight - needlessRaceFrames.height - TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y
+                        firstRaceFramesIndex = firstRaceFramesIndex + 1
+                        totalBattlesStatisticsBattleListFrames[firstRaceFramesIndex].wrapper
+                            :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                            :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                    until bufferHeight <= frameSpaceHeight
+                end
+                raceFrames.wrapper:animateFadeIn(1, function()
+                    if i == #totalBattlesStatisticsBattleListFrames then
+                        onFinishCallback()
+                    end
+                end)
+            end)
+        end
+    end)
 end
 
 function ShowFinalTopsFrame(notHeroes, heroes)
@@ -4050,6 +4114,7 @@ function ShowFinalTopsFrame(notHeroes, heroes)
             end
         end
     end
+    PlayInterfaceSound(SOUND_INTERFACE_UNITS_TOPS_APPEAR)
     totalBattlesStatisticsTopsWrapperFrame:animateFadeIn(1.5)
 end
 ---
@@ -4057,6 +4122,12 @@ end
 --- Created by WGPavell.
 --- DateTime: 22.03.2025 12:29
 ---
+
+SOUND_INTERFACE_BATTLE_COMPLETED = "_hd.w3mod:UI/Feedback/CheckpointPopup/QuestCheckpoint.flac"
+SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED = "Sound/Interface/QuestCompleted.flac"
+SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR = "Sound/Interface/QuestActivateWhat1.flac"
+SOUND_INTERFACE_ALL_BATTLES_COMPLETED = "Sound/Interface/ClanInvitation.flac"
+SOUND_INTERFACE_UNITS_TOPS_APPEAR = "Sound/Interface/ArrangedTeamInvitation.flac"
 
 FOOD_LIMIT = 100
 SPAWN_CENTER_DISTANCE = 1500
@@ -4081,18 +4152,25 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 13
+    raceIndex = 5,
+    unitIndex = 2
 }
 rightSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 13
+    raceIndex = 5,
+    unitIndex = 2
 }
 
 sideFrames = nil
 
 battleSideFrames = nil
 isWinningFrameAppearing = false
+
+TREE_RESTORE_DELAY = 15.0
+TREES_FILTER = Filter(function()
+    local destructableType = GetDestructableTypeId(GetFilterDestructable())
+    return destructableType == FourCC('LTlt') or destructableType == FourCC('ATtc') or destructableType == FourCC('BTtc')
+end)
+treeDiesTrg = nil
 
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
@@ -4207,7 +4285,15 @@ function PrepareNewBattle()
 
     ClearUpgradeFrames()
 
+    EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
+        local destructable = GetEnumDestructable()
+        if GetWidgetLife(destructable) <= 0.405 then
+            DestructableRestoreLife(destructable, GetDestructableMaxLife(destructable), true)
+        end
+    end)
+
     local prevLeftSideData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    local prevRightSideData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
@@ -4227,8 +4313,12 @@ function PrepareNewBattle()
                             --debugPrint("All battles done")
                             ShowStatisticsFrame(prevLeftSideData.history, function()
                                 DelayCallback(5, function()
-                                    HideStatisticsFrame(function()
-                                        RunFinalStatisticsFrames()
+                                    ShowStatisticsFrame(prevRightSideData.history, function()
+                                        DelayCallback(5, function()
+                                            HideStatisticsFrame(function()
+                                                RunFinalStatisticsFrames()
+                                            end)
+                                        end)
                                     end)
                                 end)
                             end)
@@ -4268,29 +4358,32 @@ function PrepareNewBattle()
 end
 
 function StartNewBattle()
-    local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
-    local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
-    local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
-    local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
-
-    UpdateStatisticsFrames()
-
-    battleInfoWrapperFrame:animateFadeIn(0.4, function()
-        TimerStart(CreateTimer(), 1, false, function()
-            battleInfoWrapperFrame:animateFadeOut(0.4)
-        end)
-    end)
-    for _, unit in ipairs(leftSideUnits) do
-        IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
-    end
-    for _, unit in ipairs(rightSideUnits) do
-        IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
-    end
-
-    TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
-    TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
-
     CenterCameraOnGroups()
+    DelayCallback(1, function()
+        local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+        local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
+        local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
+        local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
+
+        UpdateStatisticsFrames()
+
+        battleInfoWrapperFrame:animateFadeIn(0.4, function()
+            TimerStart(CreateTimer(), 3, false, function()
+                battleInfoWrapperFrame:animateFadeOut(0.4)
+            end)
+        end)
+        for _, unit in ipairs(leftSideUnits) do
+            IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
+        end
+        for _, unit in ipairs(rightSideUnits) do
+            IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
+        end
+
+        TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
+        TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
+
+        CenterCameraOnGroups()
+    end)
 end
 
 sideUnitsAttackRecycleTimer = CreateTimer()
@@ -4362,6 +4455,7 @@ function BattleUnitDefeatTrgAction()
         winnerUnitsData.victories = winnerUnitsData.victories + 1
         isWinningFrameAppearing = true
         battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. winnerUnitsData.name)
+        PlayInterfaceSound(SOUND_INTERFACE_BATTLE_COMPLETED)
         battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
             DelayCallback(2.5, function()
                 battleWinnerTextFrame:animateFadeOut(0.75)
@@ -4446,25 +4540,38 @@ function CenterCameraOnGroups()
             maxX = math.max(maxX, GetUnitX(unit))
             minY = math.min(minY, GetUnitY(unit))
             maxY = math.max(maxY, GetUnitY(unit))
-            --totalX = totalX + GetUnitX(unit)
-            --totalY = totalY + GetUnitY(unit)
-            --totalUnits = totalUnits + 1
         end)
     end
-    --totalUnits = math.max(1, totalUnits)
-    --local centerX = totalX / totalUnits
-    --local centerY = totalY / totalUnits
-    local centerX = (maxX + minX) / 2
-    local centerY = (maxY + minY) / 2
-    local width = maxX - minX
-    local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
-    local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
-    local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
-    local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
-    local distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
+    local centerX = 0.0
+    local centerY = 0.0
+    local distance = 1650.0
+    debugPrintAny(minX)
+    debugPrintAny(maxX)
+    debugPrintAny(minY)
+    debugPrintAny(maxY)
+    if not (minX == 0 and maxX == 0 and minY == 0 and maxY == 0) then
+        centerX = (maxX + minX) / 2
+        centerY = (maxY + minY) / 2
+        local width = maxX - minX
+        local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
+        local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
+        local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
+        local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
+        distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
+    end
+
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
     CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
     CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
+end
+
+function TreeDiesAction()
+    local destructable = GetDyingDestructable()
+    DelayCallback(TREE_RESTORE_DELAY, function()
+        if GetWidgetLife(destructable) <= 0.405 then
+            DestructableRestoreLife(destructable, GetDestructableMaxLife(destructable), true)
+        end
+    end)
 end
 
 OnInit.map(function()
@@ -4473,6 +4580,9 @@ OnInit.map(function()
     SetCameraPosition(0, 0)
     SetTimeOfDay(12)
     SuspendTimeOfDay(true)
+    EndThematicMusic()
+    ClearMapMusic()
+    VolumeGroupSetVolume(SOUND_VOLUMEGROUP_AMBIENTSOUNDS, 0)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
@@ -4508,10 +4618,9 @@ OnInit.map(function()
     CameraSetupSetField(panningCamera, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
     CameraSetupSetDestPosition(panningCamera, 0, 0, 0.0)
 
-    --local unit = CreateUnit(Player(0), FourCC('hsor'), 0, 0, 0)
-    --debugPrintAny(BlzGetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0))
+    --local unit = CreateUnit(Player(0), FourCC('Ekee'), 0, 0, 0)
     --SetHeroLevel(unit, 10, false)
-    --for _, ability in ipairs(heroAbilities['Hamg']) do
+    --for _, ability in ipairs(heroAbilities['Ekee']) do
     --    repeat
     --        local prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
     --        SelectHeroSkill(unit, FourCC(ability))
@@ -4530,6 +4639,12 @@ OnInit.map(function()
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
+
+    treeDiesTrg = CreateTrigger()
+    EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
+        TriggerRegisterDeathEvent(treeDiesTrg, GetEnumDestructable())
+    end)
+    TriggerAddAction(treeDiesTrg, TreeDiesAction)
 end)
 
 function RunFinalStatisticsFrames()
@@ -4575,10 +4690,11 @@ function RunFinalStatisticsFrames()
             return a.victoryPercentage < b.victoryPercentage
         end)
         worstUnitNotHeroList = {table.unpack(worstUnitNotHeroList, 1, 5)}
-        ShowFinalRacesFrame(unitList)
-        DelayCallback(15, function()
-            totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
-                ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+        ShowFinalRacesFrame(unitList, function()
+            DelayCallback(15, function()
+                totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
+                    ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+                end)
             end)
         end)
     end)
@@ -4623,91 +4739,108 @@ OnInit.final(function()
     --    end
     --    RunFinalStatisticsFrames()
     --end)
-    DelayCallback(1, PrepareNewBattle)
+    DelayCallback(1, function()
+        PrepareNewBattle()
+        for _, side in ipairs({SPAWN_LEFT, SPAWN_RIGHT}) do
+            for _, frame in ipairs(upgradeFrames[side].frames) do
+                frame:setVisible(false)
+            end
+        end
+        DelayCallback(1.25, function()
+            for index, side in ipairs(sideFrames) do
+                side.icon.cover:animateFadeIn(0.75)
+                side.text:animateFadeIn(0.75)
+                side.statistics:animateFadeIn(0.75)
+                for _, frame in ipairs(upgradeFrames[index].frames) do
+                    frame:animateFadeIn(0.75)
+                end
+            end
+        end)
+    end)
 end)
 --CUSTOM_CODE
 function Trig_Untitled_Trigger_001_Conditions()
-if (not (IsUnitType(GetTriggerUnit(), UNIT_TYPE_STRUCTURE) == true)) then
-return false
-end
-return true
+    if (not (IsUnitType(GetTriggerUnit(), UNIT_TYPE_STRUCTURE) == true)) then
+        return false
+    end
+    return true
 end
 
 function Trig_Untitled_Trigger_001_Actions()
-CameraSetupApplyForPlayer(true, gg_cam_Camera_001, Player(0), 2.00)
-SetTimeOfDay(12)
-UseTimeOfDayBJ(false)
+    DestructableRestoreLife(GetLastCreatedDestructable(), GetDestructableMaxLife(GetLastCreatedDestructable()), true)
+    PlaySoundBJ(gg_snd_QuestCompleted)
 end
 
 function InitTrig_Untitled_Trigger_001()
-gg_trg_Untitled_Trigger_001 = CreateTrigger()
-TriggerAddCondition(gg_trg_Untitled_Trigger_001, Condition(Trig_Untitled_Trigger_001_Conditions))
-TriggerAddAction(gg_trg_Untitled_Trigger_001, Trig_Untitled_Trigger_001_Actions)
+    gg_trg_Untitled_Trigger_001 = CreateTrigger()
+    TriggerAddCondition(gg_trg_Untitled_Trigger_001, Condition(Trig_Untitled_Trigger_001_Conditions))
+    TriggerAddAction(gg_trg_Untitled_Trigger_001, Trig_Untitled_Trigger_001_Actions)
 end
 
 function InitCustomTriggers()
-InitTrig_Untitled_Trigger_001()
+    InitTrig_Untitled_Trigger_001()
 end
 
 function InitCustomPlayerSlots()
-SetPlayerStartLocation(Player(0), 0)
-ForcePlayerStartLocation(Player(0), 0)
-SetPlayerColor(Player(0), ConvertPlayerColor(0))
-SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
-SetPlayerRaceSelectable(Player(0), false)
-SetPlayerController(Player(0), MAP_CONTROL_USER)
-SetPlayerStartLocation(Player(1), 1)
-ForcePlayerStartLocation(Player(1), 1)
-SetPlayerColor(Player(1), ConvertPlayerColor(1))
-SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
-SetPlayerRaceSelectable(Player(1), true)
-SetPlayerController(Player(1), MAP_CONTROL_COMPUTER)
-SetPlayerStartLocation(Player(2), 2)
-ForcePlayerStartLocation(Player(2), 2)
-SetPlayerColor(Player(2), ConvertPlayerColor(2))
-SetPlayerRacePreference(Player(2), RACE_PREF_RANDOM)
-SetPlayerRaceSelectable(Player(2), true)
-SetPlayerController(Player(2), MAP_CONTROL_COMPUTER)
+    SetPlayerStartLocation(Player(0), 0)
+    ForcePlayerStartLocation(Player(0), 0)
+    SetPlayerColor(Player(0), ConvertPlayerColor(0))
+    SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
+    SetPlayerRaceSelectable(Player(0), false)
+    SetPlayerController(Player(0), MAP_CONTROL_USER)
+    SetPlayerStartLocation(Player(1), 1)
+    ForcePlayerStartLocation(Player(1), 1)
+    SetPlayerColor(Player(1), ConvertPlayerColor(1))
+    SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
+    SetPlayerRaceSelectable(Player(1), true)
+    SetPlayerController(Player(1), MAP_CONTROL_COMPUTER)
+    SetPlayerStartLocation(Player(2), 2)
+    ForcePlayerStartLocation(Player(2), 2)
+    SetPlayerColor(Player(2), ConvertPlayerColor(2))
+    SetPlayerRacePreference(Player(2), RACE_PREF_RANDOM)
+    SetPlayerRaceSelectable(Player(2), true)
+    SetPlayerController(Player(2), MAP_CONTROL_COMPUTER)
 end
 
 function InitCustomTeams()
-SetPlayerTeam(Player(0), 0)
-SetPlayerTeam(Player(1), 1)
-SetPlayerTeam(Player(2), 1)
+    SetPlayerTeam(Player(0), 0)
+    SetPlayerTeam(Player(1), 1)
+    SetPlayerTeam(Player(2), 1)
 end
 
 function InitAllyPriorities()
-SetStartLocPrioCount(1, 1)
-SetEnemyStartLocPrioCount(1, 2)
-SetEnemyStartLocPrio(1, 0, 2, MAP_LOC_PRIO_LOW)
-SetEnemyStartLocPrioCount(2, 2)
-SetEnemyStartLocPrio(2, 0, 1, MAP_LOC_PRIO_LOW)
+    SetStartLocPrioCount(1, 1)
+    SetEnemyStartLocPrioCount(1, 2)
+    SetEnemyStartLocPrio(1, 0, 2, MAP_LOC_PRIO_LOW)
+    SetEnemyStartLocPrioCount(2, 2)
+    SetEnemyStartLocPrio(2, 0, 1, MAP_LOC_PRIO_LOW)
 end
 
 function main()
-SetCameraBounds(-3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
-SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
-NewSoundEnvironment("Default")
-SetAmbientDaySound("LordaeronSummerDay")
-SetAmbientNightSound("LordaeronSummerNight")
-SetMapMusic("Music", true, 0)
-CreateCameras()
-InitBlizzard()
-InitGlobals()
-InitCustomTriggers()
+    SetCameraBounds(-3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+    SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
+    NewSoundEnvironment("Default")
+    SetAmbientDaySound("LordaeronSummerDay")
+    SetAmbientNightSound("LordaeronSummerNight")
+    SetMapMusic("Music", true, 0)
+    InitSounds()
+    CreateCameras()
+    InitBlizzard()
+    InitGlobals()
+    InitCustomTriggers()
 end
 
 function config()
-SetMapName("TRIGSTR_003")
-SetMapDescription("")
-SetPlayers(3)
-SetTeams(3)
-SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
-DefineStartLocation(0, -832.0, -1216.0)
-DefineStartLocation(1, 1792.0, -960.0)
-DefineStartLocation(2, -2048.0, -1216.0)
-InitCustomPlayerSlots()
-InitCustomTeams()
-InitAllyPriorities()
+    SetMapName("TRIGSTR_003")
+    SetMapDescription("")
+    SetPlayers(3)
+    SetTeams(3)
+    SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
+    DefineStartLocation(0, 0.0, 0.0)
+    DefineStartLocation(1, -512.0, 0.0)
+    DefineStartLocation(2, 512.0, 0.0)
+    InitCustomPlayerSlots()
+    InitCustomTeams()
+    InitAllyPriorities()
 end
 

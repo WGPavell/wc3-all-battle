@@ -84,14 +84,14 @@ TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH = 0.16
 TOTAL_UNIT_STATISTICS_ICON_FRAME_HEIGHT = 0.036
 TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN = 0.01
 TOTAL_UNIT_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
-TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.1
+TOTAL_UNIT_STATISTICS_APPEAR_DELAY = 0.2
 TOTAL_UNIT_STATISTICS_FADING_IN_DURATION = 1
 
 totalUnitStatisticsBattleListFrames = {}
 
 
-TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X = 0.025
-TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y = 0.025
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X = 0.015
+TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y = 0.015
 --- @type TemplateBackdropFrame
 totalBattlesStatisticsBackdropFrame = nil
 
@@ -108,9 +108,9 @@ TOTAL_BATTLES_STATISTICS_RACE_TEXT_HEIGHT = TEXT_BASE_SCALE_HEIGHT * TOTAL_BATTL
 TOTAL_BATTLES_STATISTICS_RACE_TEXT_MARGIN_BOTTOM = 0.002 * TOTAL_BATTLES_STATISTICS_RACE_TEXT_SCALE
 
 TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH = 0.12
-TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT = 0.027
+TOTAL_BATTLES_STATISTICS_ICON_FRAME_HEIGHT = 0.0265
 TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN = 0.006
-TOTAL_BATTLES_STATISTICS_ICON_SPACE_Y_MIN = 0.0075
+TOTAL_BATTLES_STATISTICS_ICON_SPACE_Y_MIN = 0.005
 TOTAL_BATTLES_STATISTICS_ICON_TEXT_BASE_SCALE = 1.8
 TOTAL_BATTLES_STATISTICS_APPEAR_DELAY = 0.1
 TOTAL_BATTLES_STATISTICS_FADING_IN_DURATION = 1
@@ -161,18 +161,18 @@ OnInit.map(function()
     BlzFrameSetAbsPoint(fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0.4, 0)
 
     leftSideIconFrame = TextureFrame:new("LeftSideIcon", "", fullscreenWrapperFrame.handle)
-    leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03)
+    leftSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPLEFT, 0.03, -0.03):setVisible(false)
     leftSideTextFrame = SimpleTextFrame:new("LeftSideText", "0", 2, fullscreenWrapperFrame.handle)
-    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0)
+    leftSideTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideIconFrame.cover.handle, FRAMEPOINT_RIGHT, 0.003, 0):setVisible(false)
     leftSideStatisticsTextFrame = SimpleTextFrame:new("LeftSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
-    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT)
+    leftSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_LEFT, leftSideTextFrame.handle, FRAMEPOINT_RIGHT, 0.01, 0):setRelativePoint(FRAMEPOINT_TOP, leftSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_LEFT):setVisible(false)
 
     rightSideIconFrame = TextureFrame:new("RightSideIcon", "", fullscreenWrapperFrame.handle)
-    rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03)
+    rightSideIconFrame.cover:setSize(0.045, 0.045):setRelativePoint(FRAMEPOINT_TOPRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_TOPRIGHT, -0.03, -0.03):setVisible(false)
     rightSideTextFrame = SimpleTextFrame:new("RightSideText", "0", 2, fullscreenWrapperFrame.handle)
-    rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0)
+    rightSideTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideIconFrame.cover.handle, FRAMEPOINT_LEFT, -0.003, 0):setVisible(false)
     rightSideStatisticsTextFrame = SimpleTextFrame:new("RightSideStatisticsText", "Всего убито: 0|nВсего умерло: 0", 1.25, fullscreenWrapperFrame.handle)
-    rightSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideTextFrame.handle, FRAMEPOINT_LEFT, -0.01, 0):setRelativePoint(FRAMEPOINT_TOP, rightSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_RIGHT)
+    rightSideStatisticsTextFrame:setRelativePoint(FRAMEPOINT_RIGHT, rightSideTextFrame.handle, FRAMEPOINT_LEFT, -0.01, 0):setRelativePoint(FRAMEPOINT_TOP, rightSideIconFrame.cover.handle, FRAMEPOINT_TOP, 0, 0):setAlignment(TEXT_JUSTIFY_TOP, TEXT_JUSTIFY_RIGHT):setVisible(false)
 
     battleInfoWrapperFrame = SimpleTypeFrame:new("BattleInfoWrapper", "SPRITE", fullscreenWrapperFrame.handle, "", 0)
     battleInfoWrapperFrame:setSize(0.3, 0):setRelativePoint(FRAMEPOINT_TOP, fullscreenCanvasFrame.handle, FRAMEPOINT_TOP, 0, 0):setRelativePoint(FRAMEPOINT_BOTTOM, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOM, 0, 0)
@@ -370,6 +370,7 @@ end
 
 function ShowStatisticsFrame(battles, onFinishCallback)
     totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    PlayInterfaceSound(SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
     local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_UNIT_STATISTICS_ICON_FRAME_WIDTH + TOTAL_UNIT_STATISTICS_ICON_SPACE_X_MIN))
@@ -416,8 +417,13 @@ function ShowStatisticsFrame(battles, onFinishCallback)
             if i == 1 then
                 wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
             elseif (i - 1) % iconFramesPerRow == 0 then
-                if (i - 1) / iconFramesPerRow > iconFramesPerCol - 1 then
+                if math.floor((i - 1) / iconFramesPerRow) > (iconFramesPerCol - 1) then
                     for j = i - (iconFramesPerRow * iconFramesPerCol), i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow - 1 do
+                        --debugPrintAny(i)
+                        --debugPrintAny(iconFramesPerRow)
+                        --debugPrintAny(iconFramesPerCol)
+                        --debugPrintAny((i - 1) / iconFramesPerRow)
+                        --debugPrintAny(j)
                         totalUnitStatisticsBattleListFrames[j].wrapper:setVisible(false):resetPoints()
                     end
                     totalUnitStatisticsBattleListFrames[i - (iconFramesPerRow * iconFramesPerCol) + iconFramesPerRow].wrapper:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
@@ -426,6 +432,9 @@ function ShowStatisticsFrame(battles, onFinishCallback)
             else
                 wrapperFrame:setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBattleListFrames[i - 1].wrapper.handle, FRAMEPOINT_TOPRIGHT, finalIconFrameHorizontalSpaceBetween, 0)
             end
+            DelayCallback(TOTAL_UNIT_STATISTICS_FADING_IN_DURATION / 2, function()
+                PlayInterfaceSound(SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR, 90)
+            end)
             wrapperFrame:animateFadeIn(TOTAL_UNIT_STATISTICS_FADING_IN_DURATION, function()
                 if i >= #battles then
                     onFinishCallback()
@@ -444,9 +453,10 @@ function HideStatisticsFrame(onFinishCallback)
     end)
 end
 
-function ShowFinalRacesFrame(raceSummary)
+function ShowFinalRacesFrame(raceSummary, onFinishCallback)
     totalBattlesStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_BATTLES_STATISTICS_WRAPPER_PADDING_X * 2
+    local frameSpaceHeight = 0.6 - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y * 2 - TOTAL_BATTLES_STATISTICS_BACKDROP_PADDING_Y * 2
     local iconFramesPerRow = math.floor((frameSpaceWidth + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN) / (TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH + TOTAL_BATTLES_STATISTICS_ICON_SPACE_X_MIN))
     local totalIconsWidth = iconFramesPerRow * TOTAL_BATTLES_STATISTICS_ICON_FRAME_WIDTH
     local finalIconFrameHorizontalSpaceBetween = (frameSpaceWidth - totalIconsWidth) / (iconFramesPerRow - 1)
@@ -463,13 +473,14 @@ function ShowFinalRacesFrame(raceSummary)
             totalBattlesStatisticsBattleListFrames[i] = {
                 wrapper = raceWrapperFrame,
                 text = raceTextFrame,
-                icons = raceIcons
+                icons = raceIcons,
             }
         else
             raceWrapperFrame = totalBattlesStatisticsBattleListFrames[i].wrapper
             raceTextFrame = totalBattlesStatisticsBattleListFrames[i].text
             raceIcons = totalBattlesStatisticsBattleListFrames[i].icons
         end
+        raceWrapperFrame:setVisible(false)
         raceTextFrame:setText("|cffffcc00" .. race.race .. "|r")
         if i == 1 then
             raceWrapperFrame
@@ -527,8 +538,35 @@ function ShowFinalRacesFrame(raceSummary)
             end
         end
         raceWrapperFrame:setSize(0, raceWrapperFrameHeight)
+        totalBattlesStatisticsBattleListFrames[i].height = raceWrapperFrameHeight
     end
+    PlayInterfaceSound(SOUND_INTERFACE_ALL_BATTLES_COMPLETED)
     totalBattlesStatisticsRacesWrapperFrame:animateFadeIn(1.5)
+    DelayCallback(0.9, function()
+        local bufferHeight = 0
+        local firstRaceFramesIndex = 1
+        for i, raceFrames in ipairs(totalBattlesStatisticsBattleListFrames) do
+            DelayCallback((i - 1) * 3, function()
+                bufferHeight = bufferHeight + raceFrames.height
+                if bufferHeight > frameSpaceHeight then
+                    repeat
+                        local needlessRaceFrames = totalBattlesStatisticsBattleListFrames[firstRaceFramesIndex]
+                        needlessRaceFrames.wrapper:setVisible(false):resetPoints()
+                        bufferHeight = bufferHeight - needlessRaceFrames.height - TOTAL_BATTLES_STATISTICS_RACE_WRAPPER_SPACE_Y
+                        firstRaceFramesIndex = firstRaceFramesIndex + 1
+                        totalBattlesStatisticsBattleListFrames[firstRaceFramesIndex].wrapper
+                            :setRelativePoint(FRAMEPOINT_TOPLEFT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPLEFT, 0, 0)
+                            :setRelativePoint(FRAMEPOINT_TOPRIGHT, totalBattlesStatisticsRacesWrapperFrame.handle, FRAMEPOINT_TOPRIGHT, 0, 0)
+                    until bufferHeight <= frameSpaceHeight
+                end
+                raceFrames.wrapper:animateFadeIn(1, function()
+                    if i == #totalBattlesStatisticsBattleListFrames then
+                        onFinishCallback()
+                    end
+                end)
+            end)
+        end
+    end)
 end
 
 function ShowFinalTopsFrame(notHeroes, heroes)
@@ -552,5 +590,6 @@ function ShowFinalTopsFrame(notHeroes, heroes)
             end
         end
     end
+    PlayInterfaceSound(SOUND_INTERFACE_UNITS_TOPS_APPEAR)
     totalBattlesStatisticsTopsWrapperFrame:animateFadeIn(1.5)
 end

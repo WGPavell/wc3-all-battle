@@ -359,6 +359,16 @@ function UpgradeDataFrame:new(namePrefix, iconPath, text, textScale, textAlignme
         return self
     end
 
+    function obj:animateFadeIn(duration, callback)
+        self.cover:animateFadeIn(duration, callback)
+        return self
+    end
+
+    function obj:animateFadeOut(duration, callback)
+        self.cover:animateFadeOut(duration, callback)
+        return self
+    end
+
     setmetatable(obj, self)
     self.__index = self
     return obj

@@ -46,7 +46,7 @@ unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'hpea', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'hpea', 'hmil', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
@@ -56,12 +56,17 @@ unitGroups = {
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
         race_key = "KEY_NIGHTELF",
         unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
+    },
+    {
+        id = "neutral",
+        race_key = "KEY_NEUTRAL",
+        unit_codes = {'Nalc', 'Nngs', 'Ntin', 'Nplh', 'Nbst', 'Nfir', 'Nbrn', 'Npbm'}
     },
 }
 
@@ -72,11 +77,7 @@ upgrades = {
     },
     {
         code = 'Rhme',
-        units = {'hdhw', 'hfoo', 'hgry', 'hkni', 'hspt'}
-    },
-    {
-        code = 'Rguv',
-        units = {'hdhw', 'hfoo', 'hgry', 'hgyr', 'hkni', 'hmpr', 'hmtm', 'hmtt', 'hpea', 'hrif', 'hsor', 'hspt', 'ocat', 'odoc', 'ogru', 'ohun', 'okod', 'opeo', 'orai', 'oshm', 'ospw', 'otau', 'otbr', 'owyv', 'uabo', 'uaco', 'uban', 'ucry', 'ufro', 'ugar', 'ugho', 'umtw', 'unec', 'uobs'}
+        units = {'hdhw', 'hfoo', 'hgry', 'hkni', 'hmil', 'hspt'}
     },
     {
         code = 'Rhan',
@@ -88,15 +89,11 @@ upgrades = {
     },
     {
         code = 'Rhar',
-        units = {'hfoo', 'hgyr', 'hkni', 'hmtt', 'hspt'}
+        units = {'hfoo', 'hgyr', 'hkni', 'hmil', 'hmtt', 'hspt'}
     },
     {
         code = 'Rhde',
         units = {'hfoo'}
-    },
-    {
-        code = 'Rhpm',
-        units = {'hfoo', 'hkni', 'hmpr', 'hrif', 'hsor', 'hspt'}
     },
     {
         code = 'Rhhb',
@@ -175,10 +172,6 @@ upgrades = {
         units = {'odoc', 'ohun', 'otbr'}
     },
     {
-        code = 'Ropm',
-        units = {'odoc', 'ogru', 'ohun', 'orai', 'oshm', 'ospw', 'otau'}
-    },
-    {
         code = 'Rome',
         units = {'ogru', 'orai', 'otau'}
     },
@@ -237,10 +230,6 @@ upgrades = {
     {
         code = 'Remk',
         units = {'earc', 'ehpr'}
-    },
-    {
-        code = 'Repm',
-        units = {'earc', 'edoc', 'edot', 'edry', 'emtg', 'esen'}
     },
     {
         code = 'Repb',
@@ -311,10 +300,6 @@ upgrades = {
         units = {'uabo', 'umtw'}
     },
     {
-        code = 'Rupm',
-        units = {'uabo', 'uban', 'ucry', 'ugho', 'unec'}
-    },
-    {
         code = 'Ruac',
         units = {'uabo', 'ugho'}
     },
@@ -324,11 +309,15 @@ upgrades = {
     },
     {
         code = 'Rura',
-        units = {'ucry', 'ufro', 'ugar'}
+        units = {'ubsp', 'ucry', 'ufro', 'ugar'}
     },
     {
         code = 'Rucr',
-        units = {'ucry', 'ufro', 'ugar'}
+        units = {'ubsp', 'ucry', 'ufro', 'ugar'}
+    },
+    {
+        code = 'Rusp',
+        units = {'ubsp', 'uobs'}
     },
     {
         code = 'Ruwb',
@@ -357,10 +346,6 @@ upgrades = {
     {
         code = 'Rusm',
         units = {'unec'}
-    },
-    {
-        code = 'Rusp',
-        units = {'uobs'}
     }
 }
 
@@ -380,7 +365,15 @@ heroAbilities = {
     Ucrl = {'AUim', 'AUts', 'AUcb', 'AUls'},
     Udea = {'AUdc', 'AUdp', 'AUau', 'AUan'},
     Udre = {'AUav', 'AUsl', 'AUcs', 'AUin'},
-    Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'}
+    Ulic = {'AUfn', 'AUfu', 'AUdr', 'AUdd'},
+    Nbrn = {'ANsi', 'ANba', 'ANdr', 'ANch'},
+    Nbst = {'ANsg', 'ANsq', 'ANsw', 'ANst'},
+    Nngs = {'ANfl', 'ANfa', 'ANms', 'ANto'},
+    Npbm = {'ANbf', 'ANdh', 'ANdb', 'ANef'},
+    Nalc = {'ANhs', 'ANab', 'ANcr', 'ANtm'},
+    Ntin = {'ANsy', 'ANcs', 'ANrg', 'ANeg'},
+    Nplh = {'ANrf', 'ANht', 'ANca', 'ANdo'},
+    Nfir = {'ANia', 'ANso', 'ANlm', 'ANvc'}
 }
 abilitiesIcons = {}
 

@@ -4,6 +4,12 @@
 --- DateTime: 22.03.2025 12:29
 ---
 
+SOUND_INTERFACE_BATTLE_COMPLETED = "_hd.w3mod:UI/Feedback/CheckpointPopup/QuestCheckpoint.flac"
+SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED = "Sound/Interface/QuestCompleted.flac"
+SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR = "Sound/Interface/QuestActivateWhat1.flac"
+SOUND_INTERFACE_ALL_BATTLES_COMPLETED = "Sound/Interface/ClanInvitation.flac"
+SOUND_INTERFACE_UNITS_TOPS_APPEAR = "Sound/Interface/ArrangedTeamInvitation.flac"
+
 FOOD_LIMIT = 100
 SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
@@ -27,18 +33,25 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 13
+    raceIndex = 5,
+    unitIndex = 2
 }
 rightSideSpawnData = {
-    raceIndex = 4,
-    unitIndex = 13
+    raceIndex = 5,
+    unitIndex = 2
 }
 
 sideFrames = nil
 
 battleSideFrames = nil
 isWinningFrameAppearing = false
+
+TREE_RESTORE_DELAY = 15.0
+TREES_FILTER = Filter(function()
+    local destructableType = GetDestructableTypeId(GetFilterDestructable())
+    return destructableType == FourCC('LTlt') or destructableType == FourCC('ATtc') or destructableType == FourCC('BTtc')
+end)
+treeDiesTrg = nil
 
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
@@ -153,7 +166,15 @@ function PrepareNewBattle()
 
     ClearUpgradeFrames()
 
+    EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
+        local destructable = GetEnumDestructable()
+        if GetWidgetLife(destructable) <= 0.405 then
+            DestructableRestoreLife(destructable, GetDestructableMaxLife(destructable), true)
+        end
+    end)
+
     local prevLeftSideData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+    local prevRightSideData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
 
     repeat
         rightSideSpawnData.unitIndex = rightSideSpawnData.unitIndex + 1
@@ -173,8 +194,12 @@ function PrepareNewBattle()
                             --debugPrint("All battles done")
                             ShowStatisticsFrame(prevLeftSideData.history, function()
                                 DelayCallback(5, function()
-                                    HideStatisticsFrame(function()
-                                        RunFinalStatisticsFrames()
+                                    ShowStatisticsFrame(prevRightSideData.history, function()
+                                        DelayCallback(5, function()
+                                            HideStatisticsFrame(function()
+                                                RunFinalStatisticsFrames()
+                                            end)
+                                        end)
                                     end)
                                 end)
                             end)
@@ -214,29 +239,31 @@ function PrepareNewBattle()
 end
 
 function StartNewBattle()
-    local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
-    local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
-    local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
-    local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
+    DelayCallback(1, function()
+        local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
+        local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
+        local leftSideUnits = CreateUnitStack(leftSideUnitData, SPAWN_LEFT)
+        local rightSideUnits = CreateUnitStack(rightSideUnitData, SPAWN_RIGHT)
 
-    UpdateStatisticsFrames()
+        UpdateStatisticsFrames()
 
-    battleInfoWrapperFrame:animateFadeIn(0.4, function()
-        TimerStart(CreateTimer(), 1, false, function()
-            battleInfoWrapperFrame:animateFadeOut(0.4)
+        battleInfoWrapperFrame:animateFadeIn(0.4, function()
+            TimerStart(CreateTimer(), 3, false, function()
+                battleInfoWrapperFrame:animateFadeOut(0.4)
+            end)
         end)
+        for _, unit in ipairs(leftSideUnits) do
+            IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
+        end
+        for _, unit in ipairs(rightSideUnits) do
+            IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
+        end
+
+        TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
+        TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
+
+        CenterCameraOnGroups()
     end)
-    for _, unit in ipairs(leftSideUnits) do
-        IssuePointOrder(unit, "attack", SPAWN_CENTER_DISTANCE, 0)
-    end
-    for _, unit in ipairs(rightSideUnits) do
-        IssuePointOrder(unit, "attack", -SPAWN_CENTER_DISTANCE, 0)
-    end
-
-    TimerStart(sideUnitsAttackRecycleTimer, SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION, false, IssueSideUnitsAttackRecycle)
-    TimerStart(centerCameraTimer, CENTER_CAMERA_DURATION, true, CenterCameraOnGroups)
-
-    CenterCameraOnGroups()
 end
 
 sideUnitsAttackRecycleTimer = CreateTimer()
@@ -308,6 +335,7 @@ function BattleUnitDefeatTrgAction()
         winnerUnitsData.victories = winnerUnitsData.victories + 1
         isWinningFrameAppearing = true
         battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. winnerUnitsData.name)
+        PlayInterfaceSound(SOUND_INTERFACE_BATTLE_COMPLETED)
         battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
             DelayCallback(2.5, function()
                 battleWinnerTextFrame:animateFadeOut(0.75)
@@ -392,25 +420,34 @@ function CenterCameraOnGroups()
             maxX = math.max(maxX, GetUnitX(unit))
             minY = math.min(minY, GetUnitY(unit))
             maxY = math.max(maxY, GetUnitY(unit))
-            --totalX = totalX + GetUnitX(unit)
-            --totalY = totalY + GetUnitY(unit)
-            --totalUnits = totalUnits + 1
         end)
     end
-    --totalUnits = math.max(1, totalUnits)
-    --local centerX = totalX / totalUnits
-    --local centerY = totalY / totalUnits
-    local centerX = (maxX + minX) / 2
-    local centerY = (maxY + minY) / 2
-    local width = maxX - minX
-    local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
-    local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
-    local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
-    local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
-    local distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
+    local centerX = 0.0
+    local centerY = 0.0
+    local distance = 1650.0
+    if not (minX == 0 and maxX == 0 and minY == 0 and maxY == 0) then
+        centerX = (maxX + minX) / 2
+        centerY = (maxY + minY) / 2
+        local width = maxX - minX
+        local height = (maxY - minY) * math.cos(math.rad(PANNING_CAMERA_ANGLE_OF_ATTACK - 270))
+        local fovY = math.deg(2 * math.atan(math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)) / math.sqrt((BlzGetLocalClientWidth() / BlzGetLocalClientHeight()) ^ 2 + 1)))
+        local distanceWidth = width / (2 * math.tan(math.rad(PANNING_CAMERA_FOV_X / 2)))
+        local distanceHeight = height / (2 * math.tan(math.rad(fovY / 2)))
+        distance = math.max(distanceWidth, distanceHeight, 1000) * 1.15
+    end
+
     CameraSetupSetField(panningCamera, CAMERA_FIELD_TARGET_DISTANCE, distance, 0.0)
     CameraSetupSetDestPosition(panningCamera, centerX, centerY, 0.0)
     CameraSetupApplyForceDuration(panningCamera, true, CENTER_CAMERA_DURATION)
+end
+
+function TreeDiesAction()
+    local destructable = GetDyingDestructable()
+    DelayCallback(TREE_RESTORE_DELAY, function()
+        if GetWidgetLife(destructable) <= 0.405 then
+            DestructableRestoreLife(destructable, GetDestructableMaxLife(destructable), true)
+        end
+    end)
 end
 
 OnInit.map(function()
@@ -419,6 +456,9 @@ OnInit.map(function()
     SetCameraPosition(0, 0)
     SetTimeOfDay(12)
     SuspendTimeOfDay(true)
+    EndThematicMusic()
+    ClearMapMusic()
+    VolumeGroupSetVolume(SOUND_VOLUMEGROUP_AMBIENTSOUNDS, 0)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
@@ -454,10 +494,9 @@ OnInit.map(function()
     CameraSetupSetField(panningCamera, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
     CameraSetupSetDestPosition(panningCamera, 0, 0, 0.0)
 
-    --local unit = CreateUnit(Player(0), FourCC('hsor'), 0, 0, 0)
-    --debugPrintAny(BlzGetUnitWeaponIntegerField(unit, UNIT_WEAPON_IF_ATTACK_ATTACK_TYPE, 0))
+    --local unit = CreateUnit(Player(0), FourCC('Ekee'), 0, 0, 0)
     --SetHeroLevel(unit, 10, false)
-    --for _, ability in ipairs(heroAbilities['Hamg']) do
+    --for _, ability in ipairs(heroAbilities['Ekee']) do
     --    repeat
     --        local prevLevel = GetUnitAbilityLevel(unit, FourCC(ability))
     --        SelectHeroSkill(unit, FourCC(ability))
@@ -476,6 +515,12 @@ OnInit.map(function()
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
+
+    treeDiesTrg = CreateTrigger()
+    EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
+        TriggerRegisterDeathEvent(treeDiesTrg, GetEnumDestructable())
+    end)
+    TriggerAddAction(treeDiesTrg, TreeDiesAction)
 end)
 
 function RunFinalStatisticsFrames()
@@ -521,10 +566,11 @@ function RunFinalStatisticsFrames()
             return a.victoryPercentage < b.victoryPercentage
         end)
         worstUnitNotHeroList = {table.unpack(worstUnitNotHeroList, 1, 5)}
-        ShowFinalRacesFrame(unitList)
-        DelayCallback(15, function()
-            totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
-                ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+        ShowFinalRacesFrame(unitList, function()
+            DelayCallback(15, function()
+                totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
+                    ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+                end)
             end)
         end)
     end)
@@ -569,5 +615,22 @@ OnInit.final(function()
     --    end
     --    RunFinalStatisticsFrames()
     --end)
-    DelayCallback(1, PrepareNewBattle)
+    DelayCallback(1, function()
+        PrepareNewBattle()
+        for _, side in ipairs({SPAWN_LEFT, SPAWN_RIGHT}) do
+            for _, frame in ipairs(upgradeFrames[side].frames) do
+                frame:setVisible(false)
+            end
+        end
+        DelayCallback(1.25, function()
+            for index, side in ipairs(sideFrames) do
+                side.icon.cover:animateFadeIn(0.75)
+                side.text:animateFadeIn(0.75)
+                side.statistics:animateFadeIn(0.75)
+                for _, frame in ipairs(upgradeFrames[index].frames) do
+                    frame:animateFadeIn(0.75)
+                end
+            end
+        end)
+    end)
 end)

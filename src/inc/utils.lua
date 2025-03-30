@@ -10,3 +10,13 @@
 function DelayCallback(timeout, callback)
     TimerStart(CreateTimer(), timeout, false, callback)
 end
+
+---PlayInterfaceSound
+---@param fileName string
+---@param volume integer
+function PlayInterfaceSound(fileName, volume)
+    local sound = CreateSound(fileName, false, false, false, 0, 0, "DefaultEAXON")
+    SetSoundVolume(sound, volume or 127)
+    StartSound(sound)
+    KillSoundWhenDone(sound)
+end
