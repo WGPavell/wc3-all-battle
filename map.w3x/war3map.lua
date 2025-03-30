@@ -3598,6 +3598,8 @@ TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y = 0.05
 TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT = 0.4
 --- @type TemplateBackdropFrame
 totalUnitStatisticsBackdropFrame = nil
+--- @type SimpleTextFrame
+totalUnitStatisticsHeaderFrame = nil
 
 TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X = 0.025
 TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y = 0.025
@@ -3725,6 +3727,8 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y)
         :setSize(0, TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT)
         :setVisible(false)
+    totalUnitStatisticsHeaderFrame = SimpleTextFrame:new("TotalUnitStatisticsHeader", "РЕЗУЛЬТАТЫ - ", 3, fullscreenWrapperFrame.handle)
+    totalUnitStatisticsHeaderFrame:setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.03):setVisible(false)
     totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
     totalUnitStatisticsWrapperFrame
         :setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
@@ -3892,8 +3896,9 @@ function AppendUpgradeFrame(side)
     upgradeFrames[side].visible_total = frameIndex
 end
 
-function ShowStatisticsFrame(battles, onFinishCallback)
+function ShowStatisticsFrame(header, battles, onFinishCallback)
     totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    totalUnitStatisticsHeaderFrame:setAlpha(255):setVisible(true)
     PlayInterfaceSound(SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
@@ -3975,6 +3980,7 @@ function HideStatisticsFrame(onFinishCallback)
         end
         onFinishCallback()
     end)
+    totalUnitStatisticsHeaderFrame.cover:animateFadeOut(0.5)
 end
 
 function ShowFinalRacesFrame(raceSummary, onFinishCallback)
@@ -4153,11 +4159,11 @@ sideHelperUnits = {}
 
 leftSideSpawnData = {
     raceIndex = 5,
-    unitIndex = 2
+    unitIndex = 7
 }
 rightSideSpawnData = {
     raceIndex = 5,
-    unitIndex = 2
+    unitIndex = 7
 }
 
 sideFrames = nil
@@ -4311,12 +4317,14 @@ function PrepareNewBattle()
                         leftSideSpawnData.raceIndex = leftSideSpawnData.raceIndex + 1
                         if unitList[leftSideSpawnData.raceIndex] == nil then
                             --debugPrint("All battles done")
-                            ShowStatisticsFrame(prevLeftSideData.history, function()
+                            ShowStatisticsFrame(prevLeftSideData.name, prevLeftSideData.history, function()
                                 DelayCallback(5, function()
-                                    ShowStatisticsFrame(prevRightSideData.history, function()
-                                        DelayCallback(5, function()
-                                            HideStatisticsFrame(function()
-                                                RunFinalStatisticsFrames()
+                                    HideStatisticsFrame(function()
+                                        ShowStatisticsFrame(prevRightSideData.name, prevRightSideData.history, function()
+                                            DelayCallback(5, function()
+                                                HideStatisticsFrame(function()
+                                                    RunFinalStatisticsFrames()
+                                                end)
                                             end)
                                         end)
                                     end)
@@ -4345,7 +4353,7 @@ function PrepareNewBattle()
 
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     if prevLeftSideData ~= leftSideUnitData then
-        ShowStatisticsFrame(prevLeftSideData.history, function()
+        ShowStatisticsFrame(prevLeftSideData.name, prevLeftSideData.history, function()
             DelayCallback(5, function()
                 HideStatisticsFrame(function()
                     StartNewBattle()
@@ -4358,7 +4366,6 @@ function PrepareNewBattle()
 end
 
 function StartNewBattle()
-    CenterCameraOnGroups()
     DelayCallback(1, function()
         local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
         local rightSideUnitData = unitList[rightSideSpawnData.raceIndex].units[rightSideSpawnData.unitIndex]
@@ -4454,6 +4461,11 @@ function BattleUnitDefeatTrgAction()
         winnerUnitsData.battles = winnerUnitsData.battles + 1
         winnerUnitsData.victories = winnerUnitsData.victories + 1
         isWinningFrameAppearing = true
+        ForGroup(sideGroups[winnerSide], function()
+            if GetUnitCurrentOrder(GetEnumUnit()) ~= 0 then
+                IssueImmediateOrder(GetEnumUnit(), "stop")
+            end
+        end)
         battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. winnerUnitsData.name)
         PlayInterfaceSound(SOUND_INTERFACE_BATTLE_COMPLETED)
         battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
@@ -4498,6 +4510,7 @@ function BattleUnitSummonHelperAction()
     sideHelperUnits[summonedUnit] = true
     unitsInBattle[summonedUnit] = unitSide
     GroupAddUnit(sideGroups[unitSide], summonedUnit)
+    GroupAddUnit(battleUnitsGroup, summonedUnit)
     DelayCallback(1, function()
         IssueUnitAttackRandomTarget(summonedUnit, unitSide)
     end)
@@ -4545,10 +4558,6 @@ function CenterCameraOnGroups()
     local centerX = 0.0
     local centerY = 0.0
     local distance = 1650.0
-    debugPrintAny(minX)
-    debugPrintAny(maxX)
-    debugPrintAny(minY)
-    debugPrintAny(maxY)
     if not (minX == 0 and maxX == 0 and minY == 0 and maxY == 0) then
         centerX = (maxX + minX) / 2
         centerY = (maxY + minY) / 2

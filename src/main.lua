@@ -34,11 +34,11 @@ sideHelperUnits = {}
 
 leftSideSpawnData = {
     raceIndex = 5,
-    unitIndex = 2
+    unitIndex = 7
 }
 rightSideSpawnData = {
     raceIndex = 5,
-    unitIndex = 2
+    unitIndex = 7
 }
 
 sideFrames = nil
@@ -192,12 +192,14 @@ function PrepareNewBattle()
                         leftSideSpawnData.raceIndex = leftSideSpawnData.raceIndex + 1
                         if unitList[leftSideSpawnData.raceIndex] == nil then
                             --debugPrint("All battles done")
-                            ShowStatisticsFrame(prevLeftSideData.history, function()
+                            ShowStatisticsFrame(prevLeftSideData.name, prevLeftSideData.history, function()
                                 DelayCallback(5, function()
-                                    ShowStatisticsFrame(prevRightSideData.history, function()
-                                        DelayCallback(5, function()
-                                            HideStatisticsFrame(function()
-                                                RunFinalStatisticsFrames()
+                                    HideStatisticsFrame(function()
+                                        ShowStatisticsFrame(prevRightSideData.name, prevRightSideData.history, function()
+                                            DelayCallback(5, function()
+                                                HideStatisticsFrame(function()
+                                                    RunFinalStatisticsFrames()
+                                                end)
                                             end)
                                         end)
                                     end)
@@ -226,7 +228,7 @@ function PrepareNewBattle()
 
     local leftSideUnitData = unitList[leftSideSpawnData.raceIndex].units[leftSideSpawnData.unitIndex]
     if prevLeftSideData ~= leftSideUnitData then
-        ShowStatisticsFrame(prevLeftSideData.history, function()
+        ShowStatisticsFrame(prevLeftSideData.name, prevLeftSideData.history, function()
             DelayCallback(5, function()
                 HideStatisticsFrame(function()
                     StartNewBattle()
@@ -334,6 +336,11 @@ function BattleUnitDefeatTrgAction()
         winnerUnitsData.battles = winnerUnitsData.battles + 1
         winnerUnitsData.victories = winnerUnitsData.victories + 1
         isWinningFrameAppearing = true
+        ForGroup(sideGroups[winnerSide], function()
+            if GetUnitCurrentOrder(GetEnumUnit()) ~= 0 then
+                IssueImmediateOrder(GetEnumUnit(), "stop")
+            end
+        end)
         battleWinnerTextFrame:setText("|cffffcc00ПОБЕДИТЕЛЬ|r\n\n" .. winnerUnitsData.name)
         PlayInterfaceSound(SOUND_INTERFACE_BATTLE_COMPLETED)
         battleWinnerBackdropFrame.cover:setVisible(true):animateSize(0.75, nil, 0.3, nil, nil, function()
@@ -378,6 +385,7 @@ function BattleUnitSummonHelperAction()
     sideHelperUnits[summonedUnit] = true
     unitsInBattle[summonedUnit] = unitSide
     GroupAddUnit(sideGroups[unitSide], summonedUnit)
+    GroupAddUnit(battleUnitsGroup, summonedUnit)
     DelayCallback(1, function()
         IssueUnitAttackRandomTarget(summonedUnit, unitSide)
     end)

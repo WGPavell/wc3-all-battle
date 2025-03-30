@@ -74,6 +74,8 @@ TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y = 0.05
 TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT = 0.4
 --- @type TemplateBackdropFrame
 totalUnitStatisticsBackdropFrame = nil
+--- @type SimpleTextFrame
+totalUnitStatisticsHeaderFrame = nil
 
 TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X = 0.025
 TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y = 0.025
@@ -200,6 +202,11 @@ OnInit.map(function()
         :setRelativePoint(FRAMEPOINT_BOTTOMLEFT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMLEFT, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y)
         :setRelativePoint(FRAMEPOINT_BOTTOMRIGHT, fullscreenCanvasFrame.handle, FRAMEPOINT_BOTTOMRIGHT, -TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X, TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_Y)
         :setSize(0, TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT)
+        :setVisible(false)
+    totalUnitStatisticsHeaderFrame = SimpleTextFrame:new("TotalUnitStatisticsHeader", "РЕЗУЛЬТАТЫ - ", 3, fullscreenWrapperFrame.handle)
+    totalUnitStatisticsHeaderFrame
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.01)
+        :setColor(255, 204, 0)
         :setVisible(false)
     totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
     totalUnitStatisticsWrapperFrame
@@ -368,8 +375,9 @@ function AppendUpgradeFrame(side)
     upgradeFrames[side].visible_total = frameIndex
 end
 
-function ShowStatisticsFrame(battles, onFinishCallback)
+function ShowStatisticsFrame(header, battles, onFinishCallback)
     totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
+    totalUnitStatisticsHeaderFrame:setAlpha(255):setVisible(true):setText("РЕЗУЛЬТАТЫ - " .. header)
     PlayInterfaceSound(SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
@@ -451,6 +459,7 @@ function HideStatisticsFrame(onFinishCallback)
         end
         onFinishCallback()
     end)
+    totalUnitStatisticsHeaderFrame.cover:animateFadeOut(0.5)
 end
 
 function ShowFinalRacesFrame(raceSummary, onFinishCallback)
