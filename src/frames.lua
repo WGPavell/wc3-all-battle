@@ -205,7 +205,7 @@ OnInit.map(function()
         :setVisible(false)
     totalUnitStatisticsHeaderFrame = SimpleTextFrame:new("TotalUnitStatisticsHeader", "РЕЗУЛЬТАТЫ - ", 3, fullscreenWrapperFrame.handle)
     totalUnitStatisticsHeaderFrame
-        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.01)
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.0025)
         :setColor(255, 204, 0)
         :setVisible(false)
     totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
@@ -453,13 +453,13 @@ function ShowStatisticsFrame(header, battles, onFinishCallback)
 end
 
 function HideStatisticsFrame(onFinishCallback)
+    totalUnitStatisticsHeaderFrame:animateFadeOut(0.5)
     totalUnitStatisticsBackdropFrame.cover:animateFadeOut(0.5, function()
         for _, iconFrame in ipairs(totalUnitStatisticsBattleListFrames) do
             iconFrame.wrapper:setVisible(false):resetPoints()
         end
         onFinishCallback()
     end)
-    totalUnitStatisticsHeaderFrame.cover:animateFadeOut(0.5)
 end
 
 function ShowFinalRacesFrame(raceSummary, onFinishCallback)

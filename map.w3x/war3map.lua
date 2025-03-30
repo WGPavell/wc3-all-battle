@@ -7,43 +7,43 @@ function InitGlobals()
 end
 
 function InitSounds()
-    gg_snd_QuestCompleted = CreateSound("Sound/Interface/QuestCompleted.flac", false, false, false, 0, 0, "DefaultEAXON")
-    SetSoundParamsFromLabel(gg_snd_QuestCompleted, "QuestCompleted")
-    SetSoundDuration(gg_snd_QuestCompleted, 5154)
-    SetSoundVolume(gg_snd_QuestCompleted, 80)
-    gg_snd_QuestCheckpoint = CreateSound("UI/Feedback/CheckpointPopup/QuestCheckpoint.flac", false, false, false, 0, 0, "DefaultEAXON")
-    SetSoundParamsFromLabel(gg_snd_QuestCheckpoint, "QuestCheckpoint")
-    SetSoundDuration(gg_snd_QuestCheckpoint, 5154)
-    SetSoundVolume(gg_snd_QuestCheckpoint, 64)
+gg_snd_QuestCompleted = CreateSound("Sound/Interface/QuestCompleted.flac", false, false, false, 0, 0, "DefaultEAXON")
+SetSoundParamsFromLabel(gg_snd_QuestCompleted, "QuestCompleted")
+SetSoundDuration(gg_snd_QuestCompleted, 5154)
+SetSoundVolume(gg_snd_QuestCompleted, 80)
+gg_snd_QuestCheckpoint = CreateSound("UI/Feedback/CheckpointPopup/QuestCheckpoint.flac", false, false, false, 0, 0, "DefaultEAXON")
+SetSoundParamsFromLabel(gg_snd_QuestCheckpoint, "QuestCheckpoint")
+SetSoundDuration(gg_snd_QuestCheckpoint, 5154)
+SetSoundVolume(gg_snd_QuestCheckpoint, 64)
 end
 
 function CreateCameras()
-    gg_cam_Camera_001 = CreateCameraSetup()
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_TARGET_DISTANCE, 3000.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FARZ, 5000.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_NEARZ, 16.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    CameraSetupSetDestPosition(gg_cam_Camera_001, 1149.4, -39.0, 0.0)
-    gg_cam_Camera_002 = CreateCameraSetup()
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROTATION, 90.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_TARGET_DISTANCE, 1399.5, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROLL, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FARZ, 5000.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_NEARZ, 16.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
-    CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
-    CameraSetupSetDestPosition(gg_cam_Camera_002, 1149.4, -39.0, 0.0)
+gg_cam_Camera_001 = CreateCameraSetup()
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROTATION, 90.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_TARGET_DISTANCE, 3000.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_ROLL, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_FARZ, 5000.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_NEARZ, 16.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_001, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
+CameraSetupSetDestPosition(gg_cam_Camera_001, 1149.4, -39.0, 0.0)
+gg_cam_Camera_002 = CreateCameraSetup()
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ZOFFSET, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROTATION, 90.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ANGLE_OF_ATTACK, 304.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_TARGET_DISTANCE, 1399.5, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_ROLL, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FIELD_OF_VIEW, 70.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_FARZ, 5000.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_NEARZ, 16.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_PITCH, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_YAW, 0.0, 0.0)
+CameraSetupSetField(gg_cam_Camera_002, CAMERA_FIELD_LOCAL_ROLL, 0.0, 0.0)
+CameraSetupSetDestPosition(gg_cam_Camera_002, 1149.4, -39.0, 0.0)
 end
 
 --CUSTOM_CODE
@@ -2953,7 +2953,7 @@ function TemplateBackdropFrame:new(namePrefix, template, parent, priority, conte
 end
 ---
 --- Generated by EmmyLua(https://github.com/EmmyLua)
---- Created by Pavell.
+--- Created by WGPavell.
 --- DateTime: 26.03.2025 19:01
 ---
 
@@ -3097,17 +3097,17 @@ unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'hpea', 'hmil', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
         race_key = "KEY_ORC",
-        unit_codes = {'opeo', 'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
+        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
     },
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
@@ -3728,7 +3728,10 @@ OnInit.map(function()
         :setSize(0, TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT)
         :setVisible(false)
     totalUnitStatisticsHeaderFrame = SimpleTextFrame:new("TotalUnitStatisticsHeader", "РЕЗУЛЬТАТЫ - ", 3, fullscreenWrapperFrame.handle)
-    totalUnitStatisticsHeaderFrame:setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.03):setVisible(false)
+    totalUnitStatisticsHeaderFrame
+        :setRelativePoint(FRAMEPOINT_BOTTOM, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOP, 0, 0.0025)
+        :setColor(255, 204, 0)
+        :setVisible(false)
     totalUnitStatisticsWrapperFrame = SimpleEmptyFrame:new("TotalUnitStatisticsWrapper", totalUnitStatisticsBackdropFrame.cover.handle)
     totalUnitStatisticsWrapperFrame
         :setRelativePoint(FRAMEPOINT_TOPLEFT, totalUnitStatisticsBackdropFrame.cover.handle, FRAMEPOINT_TOPLEFT, TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X, -TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y)
@@ -3898,7 +3901,7 @@ end
 
 function ShowStatisticsFrame(header, battles, onFinishCallback)
     totalUnitStatisticsBackdropFrame.cover:setAlpha(255):setVisible(true)
-    totalUnitStatisticsHeaderFrame:setAlpha(255):setVisible(true)
+    totalUnitStatisticsHeaderFrame:setAlpha(255):setVisible(true):setText("РЕЗУЛЬТАТЫ - " .. header)
     PlayInterfaceSound(SOUND_INTERFACE_ALL_UNIT_BATTLES_COMPLETED)
     local frameSpaceWidth = GetScreenFrameWidth() - TOTAL_UNIT_STATISTICS_BACKDROP_PADDING_X * 2 - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_X * 2
     local frameSpaceHeight = TOTAL_UNIT_STATISTICS_BACKDROP_HEIGHT - TOTAL_UNIT_STATISTICS_WRAPPER_PADDING_Y * 2
@@ -3974,13 +3977,13 @@ function ShowStatisticsFrame(header, battles, onFinishCallback)
 end
 
 function HideStatisticsFrame(onFinishCallback)
+    totalUnitStatisticsHeaderFrame:animateFadeOut(0.5)
     totalUnitStatisticsBackdropFrame.cover:animateFadeOut(0.5, function()
         for _, iconFrame in ipairs(totalUnitStatisticsBattleListFrames) do
             iconFrame.wrapper:setVisible(false):resetPoints()
         end
         onFinishCallback()
     end)
-    totalUnitStatisticsHeaderFrame.cover:animateFadeOut(0.5)
 end
 
 function ShowFinalRacesFrame(raceSummary, onFinishCallback)
@@ -4135,7 +4138,7 @@ SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR = "Sound/Interface/QuestActivateWhat1.fl
 SOUND_INTERFACE_ALL_BATTLES_COMPLETED = "Sound/Interface/ClanInvitation.flac"
 SOUND_INTERFACE_UNITS_TOPS_APPEAR = "Sound/Interface/ArrangedTeamInvitation.flac"
 
-FOOD_LIMIT = 100
+FOOD_LIMIT = 50
 SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
 SPAWN_RADIUS_HEIGHT = 1500
@@ -4158,12 +4161,12 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 5,
-    unitIndex = 7
+    raceIndex = 1,
+    unitIndex = 1
 }
 rightSideSpawnData = {
-    raceIndex = 5,
-    unitIndex = 7
+    raceIndex = 1,
+    unitIndex = 1
 }
 
 sideFrames = nil
@@ -4177,6 +4180,9 @@ TREES_FILTER = Filter(function()
     return destructableType == FourCC('LTlt') or destructableType == FourCC('ATtc') or destructableType == FourCC('BTtc')
 end)
 treeDiesTrg = nil
+
+isCursorEnabled = galse
+toggleMouseCursorTrg = nil
 
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
@@ -4267,7 +4273,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        SetWidgetLife(unit, 1)
+        --SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -4516,7 +4522,7 @@ function BattleUnitSummonHelperAction()
     end)
 end
 
-function BattleUnitTemporaryDisableSpiritFormAction()
+function BattleUnitSpellsBehaviorAction()
     local unit = GetTriggerUnit()
     local spellId = GetSpellAbilityId()
     if GetUnitCurrentOrder(unit) == OrderId("uncorporealform") then
@@ -4528,6 +4534,26 @@ function BattleUnitTemporaryDisableSpiritFormAction()
                     BlzUnitDisableAbility(unit, spellId, false, false)
                 end
             end)
+        end)
+    elseif GetSpellAbilityId() == FourCC('AOwk') then
+        DelayCallback(math.random(3, 7), function()
+            if UnitAlive(unit) then
+                local unitSide = unitsInBattle[unit]
+                if unitSide == nil then return end
+                local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+                if targetUnit ~= nil then
+                    RemoveGuardPosition(unit) -- AI prevents to attack unit in windwalk even if do it manually
+                    IssueTargetOrder(unit, "attack", targetUnit)
+                    local timer = CreateTimer()
+                    TimerStart(timer, 0.25, true, function()
+                        if GetUnitAbilityLevel(unit, FourCC('BOwk')) == 0 then
+                            RecycleGuardPosition(unit)
+                            PauseTimer(timer)
+                            DestroyTimer(timer)
+                        end
+                    end)
+                end
+            end
         end)
     end
 end
@@ -4543,9 +4569,6 @@ function CenterCameraOnGroups()
     local maxX = 0
     local minY = 0
     local maxY = 0
-    --local totalX = 0.0
-    --local totalY = 0.0
-    --local totalUnits = 0
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
             local unit = GetEnumUnit()
@@ -4583,6 +4606,11 @@ function TreeDiesAction()
     end)
 end
 
+function ToggleMouseCursorAction()
+    isCursorEnabled = not isCursorEnabled
+    BlzEnableCursor(isCursorEnabled)
+end
+
 OnInit.map(function()
     FogEnable(false)
     FogMaskEnable(false)
@@ -4592,6 +4620,7 @@ OnInit.map(function()
     EndThematicMusic()
     ClearMapMusic()
     VolumeGroupSetVolume(SOUND_VOLUMEGROUP_AMBIENTSOUNDS, 0)
+    BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
@@ -4647,13 +4676,18 @@ OnInit.map(function()
     battleUnitTemporaryDisableSpiritFormTrg = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
-    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
+    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitSpellsBehaviorAction)
 
     treeDiesTrg = CreateTrigger()
     EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
         TriggerRegisterDeathEvent(treeDiesTrg, GetEnumDestructable())
     end)
     TriggerAddAction(treeDiesTrg, TreeDiesAction)
+
+    toggleMouseCursorTrg = CreateTrigger()
+    --BlzTriggerRegisterPlayerKeyEvent(toggleMouseCursorTrg, Player(0), OSKEY_F, 0, true)
+    TriggerRegisterPlayerEvent(toggleMouseCursorTrg, Player(0), EVENT_PLAYER_END_CINEMATIC)
+    TriggerAddAction(toggleMouseCursorTrg, ToggleMouseCursorAction)
 end)
 
 function RunFinalStatisticsFrames()
@@ -4703,6 +4737,14 @@ function RunFinalStatisticsFrames()
             DelayCallback(15, function()
                 totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
                     ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+                    DelayCallback(15, function()
+                        totalBattlesStatisticsTopsWrapperFrame:animateFadeOut(1.5)
+                        DelayCallback(1, function()
+                            totalBattlesStatisticsBackdropFrame.cover:animateFadeOut(1.5, function()
+                                EndGame(false)
+                            end)
+                        end)
+                    end)
                 end)
             end)
         end)
@@ -4769,87 +4811,89 @@ OnInit.final(function()
 end)
 --CUSTOM_CODE
 function Trig_Untitled_Trigger_001_Conditions()
-    if (not (IsUnitType(GetTriggerUnit(), UNIT_TYPE_STRUCTURE) == true)) then
-        return false
-    end
-    return true
+if (not (GetSpellAbilityId() == FourCC("AUan"))) then
+return false
+end
+return true
 end
 
 function Trig_Untitled_Trigger_001_Actions()
-    DestructableRestoreLife(GetLastCreatedDestructable(), GetDestructableMaxLife(GetLastCreatedDestructable()), true)
-    PlaySoundBJ(gg_snd_QuestCompleted)
+SetUserControlForceOn(GetPlayersAll())
+DestructableRestoreLife(GetLastCreatedDestructable(), GetDestructableMaxLife(GetLastCreatedDestructable()), true)
+PlaySoundBJ(gg_snd_QuestCompleted)
 end
 
 function InitTrig_Untitled_Trigger_001()
-    gg_trg_Untitled_Trigger_001 = CreateTrigger()
-    TriggerAddCondition(gg_trg_Untitled_Trigger_001, Condition(Trig_Untitled_Trigger_001_Conditions))
-    TriggerAddAction(gg_trg_Untitled_Trigger_001, Trig_Untitled_Trigger_001_Actions)
+gg_trg_Untitled_Trigger_001 = CreateTrigger()
+TriggerRegisterPlayerEventEndCinematic(gg_trg_Untitled_Trigger_001, Player(0))
+TriggerAddCondition(gg_trg_Untitled_Trigger_001, Condition(Trig_Untitled_Trigger_001_Conditions))
+TriggerAddAction(gg_trg_Untitled_Trigger_001, Trig_Untitled_Trigger_001_Actions)
 end
 
 function InitCustomTriggers()
-    InitTrig_Untitled_Trigger_001()
+InitTrig_Untitled_Trigger_001()
 end
 
 function InitCustomPlayerSlots()
-    SetPlayerStartLocation(Player(0), 0)
-    ForcePlayerStartLocation(Player(0), 0)
-    SetPlayerColor(Player(0), ConvertPlayerColor(0))
-    SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
-    SetPlayerRaceSelectable(Player(0), false)
-    SetPlayerController(Player(0), MAP_CONTROL_USER)
-    SetPlayerStartLocation(Player(1), 1)
-    ForcePlayerStartLocation(Player(1), 1)
-    SetPlayerColor(Player(1), ConvertPlayerColor(1))
-    SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
-    SetPlayerRaceSelectable(Player(1), true)
-    SetPlayerController(Player(1), MAP_CONTROL_COMPUTER)
-    SetPlayerStartLocation(Player(2), 2)
-    ForcePlayerStartLocation(Player(2), 2)
-    SetPlayerColor(Player(2), ConvertPlayerColor(2))
-    SetPlayerRacePreference(Player(2), RACE_PREF_RANDOM)
-    SetPlayerRaceSelectable(Player(2), true)
-    SetPlayerController(Player(2), MAP_CONTROL_COMPUTER)
+SetPlayerStartLocation(Player(0), 0)
+ForcePlayerStartLocation(Player(0), 0)
+SetPlayerColor(Player(0), ConvertPlayerColor(0))
+SetPlayerRacePreference(Player(0), RACE_PREF_HUMAN)
+SetPlayerRaceSelectable(Player(0), false)
+SetPlayerController(Player(0), MAP_CONTROL_USER)
+SetPlayerStartLocation(Player(1), 1)
+ForcePlayerStartLocation(Player(1), 1)
+SetPlayerColor(Player(1), ConvertPlayerColor(1))
+SetPlayerRacePreference(Player(1), RACE_PREF_RANDOM)
+SetPlayerRaceSelectable(Player(1), true)
+SetPlayerController(Player(1), MAP_CONTROL_COMPUTER)
+SetPlayerStartLocation(Player(2), 2)
+ForcePlayerStartLocation(Player(2), 2)
+SetPlayerColor(Player(2), ConvertPlayerColor(2))
+SetPlayerRacePreference(Player(2), RACE_PREF_RANDOM)
+SetPlayerRaceSelectable(Player(2), true)
+SetPlayerController(Player(2), MAP_CONTROL_COMPUTER)
 end
 
 function InitCustomTeams()
-    SetPlayerTeam(Player(0), 0)
-    SetPlayerTeam(Player(1), 1)
-    SetPlayerTeam(Player(2), 1)
+SetPlayerTeam(Player(0), 0)
+SetPlayerTeam(Player(1), 1)
+SetPlayerTeam(Player(2), 1)
 end
 
 function InitAllyPriorities()
-    SetStartLocPrioCount(1, 1)
-    SetEnemyStartLocPrioCount(1, 2)
-    SetEnemyStartLocPrio(1, 0, 2, MAP_LOC_PRIO_LOW)
-    SetEnemyStartLocPrioCount(2, 2)
-    SetEnemyStartLocPrio(2, 0, 1, MAP_LOC_PRIO_LOW)
+SetStartLocPrioCount(1, 1)
+SetEnemyStartLocPrioCount(1, 2)
+SetEnemyStartLocPrio(1, 0, 2, MAP_LOC_PRIO_LOW)
+SetEnemyStartLocPrioCount(2, 2)
+SetEnemyStartLocPrio(2, 0, 1, MAP_LOC_PRIO_LOW)
 end
 
 function main()
-    SetCameraBounds(-3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
-    SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
-    NewSoundEnvironment("Default")
-    SetAmbientDaySound("LordaeronSummerDay")
-    SetAmbientNightSound("LordaeronSummerNight")
-    SetMapMusic("Music", true, 0)
-    InitSounds()
-    CreateCameras()
-    InitBlizzard()
-    InitGlobals()
-    InitCustomTriggers()
+SetCameraBounds(-3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), -3328.0 + GetCameraMargin(CAMERA_MARGIN_LEFT), 3072.0 - GetCameraMargin(CAMERA_MARGIN_TOP), 3328.0 - GetCameraMargin(CAMERA_MARGIN_RIGHT), -3584.0 + GetCameraMargin(CAMERA_MARGIN_BOTTOM))
+SetDayNightModels("Environment\\DNC\\DNCLordaeron\\DNCLordaeronTerrain\\DNCLordaeronTerrain.mdl", "Environment\\DNC\\DNCLordaeron\\DNCLordaeronUnit\\DNCLordaeronUnit.mdl")
+NewSoundEnvironment("Default")
+SetAmbientDaySound("LordaeronSummerDay")
+SetAmbientNightSound("LordaeronSummerNight")
+SetMapMusic("Music", true, 0)
+InitSounds()
+CreateCameras()
+InitBlizzard()
+InitGlobals()
+InitCustomTriggers()
 end
 
 function config()
-    SetMapName("TRIGSTR_003")
-    SetMapDescription("")
-    SetPlayers(3)
-    SetTeams(3)
-    SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
-    DefineStartLocation(0, 0.0, 0.0)
-    DefineStartLocation(1, -512.0, 0.0)
-    DefineStartLocation(2, 512.0, 0.0)
-    InitCustomPlayerSlots()
-    InitCustomTeams()
-    InitAllyPriorities()
+SetMapName("TRIGSTR_003")
+SetMapDescription("")
+SetPlayers(3)
+SetTeams(3)
+SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
+DefineStartLocation(0, 0.0, 0.0)
+DefineStartLocation(1, -512.0, 0.0)
+DefineStartLocation(2, 512.0, 0.0)
+InitCustomPlayerSlots()
+InitCustomTeams()
+InitAllyPriorities()
 end
 

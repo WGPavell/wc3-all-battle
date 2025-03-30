@@ -10,7 +10,7 @@ SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR = "Sound/Interface/QuestActivateWhat1.fl
 SOUND_INTERFACE_ALL_BATTLES_COMPLETED = "Sound/Interface/ClanInvitation.flac"
 SOUND_INTERFACE_UNITS_TOPS_APPEAR = "Sound/Interface/ArrangedTeamInvitation.flac"
 
-FOOD_LIMIT = 100
+FOOD_LIMIT = 50
 SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
 SPAWN_RADIUS_HEIGHT = 1500
@@ -33,12 +33,12 @@ sideGroups = {
 sideHelperUnits = {}
 
 leftSideSpawnData = {
-    raceIndex = 5,
-    unitIndex = 7
+    raceIndex = 1,
+    unitIndex = 1
 }
 rightSideSpawnData = {
-    raceIndex = 5,
-    unitIndex = 7
+    raceIndex = 1,
+    unitIndex = 1
 }
 
 sideFrames = nil
@@ -52,6 +52,9 @@ TREES_FILTER = Filter(function()
     return destructableType == FourCC('LTlt') or destructableType == FourCC('ATtc') or destructableType == FourCC('BTtc')
 end)
 treeDiesTrg = nil
+
+isCursorEnabled = galse
+toggleMouseCursorTrg = nil
 
 function generateGridForSpawn(centerX, angle, unitsTotal)
     local directionDiff = math.cos(math.rad(angle))
@@ -142,7 +145,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        SetWidgetLife(unit, 1)
+        --SetWidgetLife(unit, 1)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -391,7 +394,7 @@ function BattleUnitSummonHelperAction()
     end)
 end
 
-function BattleUnitTemporaryDisableSpiritFormAction()
+function BattleUnitSpellsBehaviorAction()
     local unit = GetTriggerUnit()
     local spellId = GetSpellAbilityId()
     if GetUnitCurrentOrder(unit) == OrderId("uncorporealform") then
@@ -403,6 +406,26 @@ function BattleUnitTemporaryDisableSpiritFormAction()
                     BlzUnitDisableAbility(unit, spellId, false, false)
                 end
             end)
+        end)
+    elseif GetSpellAbilityId() == FourCC('AOwk') then
+        DelayCallback(math.random(3, 7), function()
+            if UnitAlive(unit) then
+                local unitSide = unitsInBattle[unit]
+                if unitSide == nil then return end
+                local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+                if targetUnit ~= nil then
+                    RemoveGuardPosition(unit) -- AI prevents to attack unit in windwalk even if do it manually
+                    IssueTargetOrder(unit, "attack", targetUnit)
+                    local timer = CreateTimer()
+                    TimerStart(timer, 0.25, true, function()
+                        if GetUnitAbilityLevel(unit, FourCC('BOwk')) == 0 then
+                            RecycleGuardPosition(unit)
+                            PauseTimer(timer)
+                            DestroyTimer(timer)
+                        end
+                    end)
+                end
+            end
         end)
     end
 end
@@ -418,9 +441,6 @@ function CenterCameraOnGroups()
     local maxX = 0
     local minY = 0
     local maxY = 0
-    --local totalX = 0.0
-    --local totalY = 0.0
-    --local totalUnits = 0
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
             local unit = GetEnumUnit()
@@ -458,6 +478,11 @@ function TreeDiesAction()
     end)
 end
 
+function ToggleMouseCursorAction()
+    isCursorEnabled = not isCursorEnabled
+    BlzEnableCursor(isCursorEnabled)
+end
+
 OnInit.map(function()
     FogEnable(false)
     FogMaskEnable(false)
@@ -467,6 +492,7 @@ OnInit.map(function()
     EndThematicMusic()
     ClearMapMusic()
     VolumeGroupSetVolume(SOUND_VOLUMEGROUP_AMBIENTSOUNDS, 0)
+    BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
@@ -522,13 +548,18 @@ OnInit.map(function()
     battleUnitTemporaryDisableSpiritFormTrg = CreateTrigger()
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(1), EVENT_PLAYER_UNIT_SPELL_EFFECT)
     TriggerRegisterPlayerUnitEvent(battleUnitTemporaryDisableSpiritFormTrg, Player(2), EVENT_PLAYER_UNIT_SPELL_EFFECT)
-    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitTemporaryDisableSpiritFormAction)
+    TriggerAddAction(battleUnitTemporaryDisableSpiritFormTrg, BattleUnitSpellsBehaviorAction)
 
     treeDiesTrg = CreateTrigger()
     EnumDestructablesInRect(GetPlayableMapRect(), TREES_FILTER, function()
         TriggerRegisterDeathEvent(treeDiesTrg, GetEnumDestructable())
     end)
     TriggerAddAction(treeDiesTrg, TreeDiesAction)
+
+    toggleMouseCursorTrg = CreateTrigger()
+    --BlzTriggerRegisterPlayerKeyEvent(toggleMouseCursorTrg, Player(0), OSKEY_F, 0, true)
+    TriggerRegisterPlayerEvent(toggleMouseCursorTrg, Player(0), EVENT_PLAYER_END_CINEMATIC)
+    TriggerAddAction(toggleMouseCursorTrg, ToggleMouseCursorAction)
 end)
 
 function RunFinalStatisticsFrames()
@@ -578,6 +609,14 @@ function RunFinalStatisticsFrames()
             DelayCallback(15, function()
                 totalBattlesStatisticsRacesWrapperFrame:animateFadeOut(1.5, function()
                     ShowFinalTopsFrame({topUnitNotHeroList, worstUnitNotHeroList}, {topUnitHeroList, worstUnitHeroList})
+                    DelayCallback(15, function()
+                        totalBattlesStatisticsTopsWrapperFrame:animateFadeOut(1.5)
+                        DelayCallback(1, function()
+                            totalBattlesStatisticsBackdropFrame.cover:animateFadeOut(1.5, function()
+                                EndGame(false)
+                            end)
+                        end)
+                    end)
                 end)
             end)
         end)

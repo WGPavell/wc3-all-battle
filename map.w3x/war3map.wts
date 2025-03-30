@@ -10,10 +10,25 @@ STRING 2
 
 STRING 3
 {
-Правая сторона
+All-Battle
 }
 
 STRING 4
+{
+1
+}
+
+STRING 5
+{
+WGPavell
+}
+
+STRING 6
+{
+Правая сторона
+}
+
+STRING 7
 {
 Борцы
 }

@@ -46,17 +46,17 @@ unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'hpea', 'hmil', 'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
         race_key = "KEY_ORC",
-        unit_codes = {'opeo', 'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
+        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
     },
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'uaco', 'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
