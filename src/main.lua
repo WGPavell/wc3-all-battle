@@ -437,10 +437,10 @@ PANNING_CAMERA_FOV_X = 70.0
 PANNING_CAMERA_ANGLE_OF_ATTACK = 304.0
 
 function CenterCameraOnGroups()
-    local minX = -99999
-    local maxX = 99999
-    local minY = -99999
-    local maxY = 99999
+    local minX = 99999
+    local maxX = -99999
+    local minY = 99999
+    local maxY = -99999
     local haveUnits = false
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
@@ -455,7 +455,7 @@ function CenterCameraOnGroups()
     local centerX = 0.0
     local centerY = 0.0
     local distance = 1650.0
-    if not haveUnits then
+    if haveUnits then
         centerX = (maxX + minX) / 2
         centerY = (maxY + minY) / 2
         local width = maxX - minX
@@ -497,8 +497,8 @@ OnInit.map(function()
     BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
-    SetPlayerHandicap(Player(1), 0.02)
-    SetPlayerHandicap(Player(2), 0.02)
+    SetPlayerHandicap(Player(1), 0.05)
+    SetPlayerHandicap(Player(2), 0.05)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
     --SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
 
