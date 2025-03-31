@@ -275,7 +275,7 @@ sideUnitsAttackRecycleTimer = CreateTimer()
 SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 2
 
 function IssueUnitAttackRandomTarget(whichUnit, unitSide)
-    if (GetUnitCurrentOrder(whichUnit) == 0) then
+    if GetUnitCurrentOrder(whichUnit) == 0 then
         local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
         if targetUnit ~= nil then
             IssuePointOrder(whichUnit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
@@ -422,6 +422,12 @@ function BattleUnitSpellsBehaviorAction()
                             RecycleGuardPosition(unit)
                             PauseTimer(timer)
                             DestroyTimer(timer)
+                        elseif GetUnitCurrentOrder(unit) == 0 then
+                            if not UnitAlive(targetUnit) then
+                                targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+                            end
+                            RemoveGuardPosition(unit)
+                            IssueTargetOrder(unit, "attack", targetUnit)
                         end
                     end)
                 end
