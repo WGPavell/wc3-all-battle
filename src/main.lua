@@ -437,12 +437,14 @@ PANNING_CAMERA_FOV_X = 70.0
 PANNING_CAMERA_ANGLE_OF_ATTACK = 304.0
 
 function CenterCameraOnGroups()
-    local minX = 0
-    local maxX = 0
-    local minY = 0
-    local maxY = 0
+    local minX = -99999
+    local maxX = 99999
+    local minY = -99999
+    local maxY = 99999
+    local haveUnits = false
     for _, sideGroup in ipairs(sideGroups) do
         ForGroup(sideGroup, function()
+            haveUnits = true
             local unit = GetEnumUnit()
             minX = math.min(minX, GetUnitX(unit))
             maxX = math.max(maxX, GetUnitX(unit))
@@ -453,7 +455,7 @@ function CenterCameraOnGroups()
     local centerX = 0.0
     local centerY = 0.0
     local distance = 1650.0
-    if not (minX == 0 and maxX == 0 and minY == 0 and maxY == 0) then
+    if not haveUnits then
         centerX = (maxX + minX) / 2
         centerY = (maxY + minY) / 2
         local width = maxX - minX
