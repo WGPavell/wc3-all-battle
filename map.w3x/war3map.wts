@@ -1,26 +1,26 @@
 ﻿STRING 1
 {
-Наблюдатель
+All-Battle
 }
 
 STRING 2
 {
-Левая сторона
+1
 }
 
 STRING 3
 {
-All-Battle
+WGPavell
 }
 
 STRING 4
 {
-1
+Наблюдатель
 }
 
 STRING 5
 {
-WGPavell
+Левая сторона
 }
 
 STRING 6

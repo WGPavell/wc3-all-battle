@@ -42,26 +42,54 @@ function debugPrintAny(object)
 end
 
 -- Why I don't use GetLocalizedString here? Because of some reason it doesn't work before main function
+--unitGroups = {
+--    {
+--        id = "human",
+--        race_key = "KEY_HUMAN",
+--        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+--    },
+--    {
+--        id = "orc",
+--        race_key = "KEY_ORC",
+--        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
+--    },
+--    {
+--        id = "undead",
+--        race_key = "KEY_UNDEAD",
+--        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+--    },
+--    {
+--        id = "nightelf",
+--        race_key = "KEY_NIGHTELF",
+--        unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
+--    },
+--    {
+--        id = "neutral",
+--        race_key = "KEY_NEUTRAL",
+--        unit_codes = {'Nalc', 'Nngs', 'Ntin', 'Nplh', 'Nbst', 'Nfir', 'Nbrn', 'Npbm'}
+--    },
+--}
+
 unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
         race_key = "KEY_ORC",
-        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
+        unit_codes = {'Obla', 'Ofar', 'Otch', 'Oshd'}
     },
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
         race_key = "KEY_NIGHTELF",
-        unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
+        unit_codes = {'Ekee', 'Emoo', 'Edem', 'Ewar'}
     },
     {
         id = "neutral",

@@ -1,20 +1,7 @@
 gg_cam_Camera_001 = nil
 gg_cam_Camera_002 = nil
-gg_snd_QuestCompleted = nil
-gg_snd_QuestCheckpoint = nil
 gg_trg_Untitled_Trigger_001 = nil
 function InitGlobals()
-end
-
-function InitSounds()
-gg_snd_QuestCompleted = CreateSound("Sound/Interface/QuestCompleted.flac", false, false, false, 0, 0, "DefaultEAXON")
-SetSoundParamsFromLabel(gg_snd_QuestCompleted, "QuestCompleted")
-SetSoundDuration(gg_snd_QuestCompleted, 5154)
-SetSoundVolume(gg_snd_QuestCompleted, 80)
-gg_snd_QuestCheckpoint = CreateSound("UI/Feedback/CheckpointPopup/QuestCheckpoint.flac", false, false, false, 0, 0, "DefaultEAXON")
-SetSoundParamsFromLabel(gg_snd_QuestCheckpoint, "QuestCheckpoint")
-SetSoundDuration(gg_snd_QuestCheckpoint, 5154)
-SetSoundVolume(gg_snd_QuestCheckpoint, 64)
 end
 
 function CreateCameras()
@@ -4138,7 +4125,7 @@ SOUND_INTERFACE_BATTLE_CONTAINER_APPEAR = "Sound/Interface/QuestActivateWhat1.fl
 SOUND_INTERFACE_ALL_BATTLES_COMPLETED = "Sound/Interface/ClanInvitation.flac"
 SOUND_INTERFACE_UNITS_TOPS_APPEAR = "Sound/Interface/ArrangedTeamInvitation.flac"
 
-FOOD_LIMIT = 50
+FOOD_LIMIT = 100
 SPAWN_CENTER_DISTANCE = 1500
 SPAWN_RADIUS_WIDTH = 1000
 SPAWN_RADIUS_HEIGHT = 1500
@@ -4273,7 +4260,7 @@ function CreateUnitStack(unitData, spawnSide)
             end
             isHeroAbilityFramesAppended = true
         end
-        --SetWidgetLife(unit, 1)
+        --SetWidgetLife(unit, GetUnitState(unit, UNIT_STATE_MAX_LIFE) * 0.02)
         SetUnitState(unit, UNIT_STATE_MANA, GetUnitState(unit, UNIT_STATE_MAX_MANA))
     end
     return spawnedUnits
@@ -4623,6 +4610,8 @@ OnInit.map(function()
     BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
+    SetPlayerHandicap(Player(1), 0.02)
+    SetPlayerHandicap(Player(2), 0.02)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
     --SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
 
@@ -4810,23 +4799,12 @@ OnInit.final(function()
     end)
 end)
 --CUSTOM_CODE
-function Trig_Untitled_Trigger_001_Conditions()
-if (not (GetSpellAbilityId() == FourCC("AUan"))) then
-return false
-end
-return true
-end
-
 function Trig_Untitled_Trigger_001_Actions()
-SetUserControlForceOn(GetPlayersAll())
-DestructableRestoreLife(GetLastCreatedDestructable(), GetDestructableMaxLife(GetLastCreatedDestructable()), true)
-PlaySoundBJ(gg_snd_QuestCompleted)
+SetPlayerHandicapBJ(Player(0), 2.00)
 end
 
 function InitTrig_Untitled_Trigger_001()
 gg_trg_Untitled_Trigger_001 = CreateTrigger()
-TriggerRegisterPlayerEventEndCinematic(gg_trg_Untitled_Trigger_001, Player(0))
-TriggerAddCondition(gg_trg_Untitled_Trigger_001, Condition(Trig_Untitled_Trigger_001_Conditions))
 TriggerAddAction(gg_trg_Untitled_Trigger_001, Trig_Untitled_Trigger_001_Actions)
 end
 
@@ -4876,7 +4854,6 @@ NewSoundEnvironment("Default")
 SetAmbientDaySound("LordaeronSummerDay")
 SetAmbientNightSound("LordaeronSummerNight")
 SetMapMusic("Music", true, 0)
-InitSounds()
 CreateCameras()
 InitBlizzard()
 InitGlobals()
@@ -4884,7 +4861,7 @@ InitCustomTriggers()
 end
 
 function config()
-SetMapName("TRIGSTR_003")
+SetMapName("TRIGSTR_001")
 SetMapDescription("")
 SetPlayers(3)
 SetTeams(3)
