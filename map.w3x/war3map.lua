@@ -3080,54 +3080,26 @@ function debugPrintAny(object)
 end
 
 -- Why I don't use GetLocalizedString here? Because of some reason it doesn't work before main function
---unitGroups = {
---    {
---        id = "human",
---        race_key = "KEY_HUMAN",
---        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
---    },
---    {
---        id = "orc",
---        race_key = "KEY_ORC",
---        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
---    },
---    {
---        id = "undead",
---        race_key = "KEY_UNDEAD",
---        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
---    },
---    {
---        id = "nightelf",
---        race_key = "KEY_NIGHTELF",
---        unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
---    },
---    {
---        id = "neutral",
---        race_key = "KEY_NEUTRAL",
---        unit_codes = {'Nalc', 'Nngs', 'Ntin', 'Nplh', 'Nbst', 'Nfir', 'Nbrn', 'Npbm'}
---    },
---}
-
 unitGroups = {
     {
         id = "human",
         race_key = "KEY_HUMAN",
-        unit_codes = {'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
+        unit_codes = {'hfoo', 'hrif', 'hkni', 'hsor', 'hmpr', 'hspt', 'hgyr', 'hmtm', 'hmtt', 'hgry', 'hdhw', 'Hpal', 'Hamg', 'Hmkg', 'Hblm'}
     },
     {
         id = "orc",
         race_key = "KEY_ORC",
-        unit_codes = {'Obla', 'Ofar', 'Otch', 'Oshd'}
+        unit_codes = {'ogru', 'ohun', 'ocat', 'oshm', 'odoc', 'ospw', 'orai', 'okod', 'owyv', 'otbr', 'otau', 'Obla', 'Ofar', 'Otch', 'Oshd'}
     },
     {
         id = "undead",
         race_key = "KEY_UNDEAD",
-        unit_codes = {'Udea', 'Ulic', 'Udre', 'Ucrl'}
+        unit_codes = {'ugho', 'ucry', 'ugar', 'unec', 'uban', 'umtw', 'uabo', 'uobs', 'ubsp', 'ufro', 'Udea', 'Ulic', 'Udre', 'Ucrl'}
     },
     {
         id = "nightelf",
         race_key = "KEY_NIGHTELF",
-        unit_codes = {'Ekee', 'Emoo', 'Edem', 'Ewar'}
+        unit_codes = {'earc', 'esen', 'ebal', 'edry', 'edoc', 'emtg', 'ehip', 'ehpr', 'edot', 'efdr', 'echm', 'Ekee', 'Emoo', 'Edem', 'Ewar'}
     },
     {
         id = "neutral",
@@ -4418,7 +4390,7 @@ sideUnitsAttackRecycleTimer = CreateTimer()
 SIDE_UNITS_ATTACK_RECYCLE_TIMER_DURATION = 2
 
 function IssueUnitAttackRandomTarget(whichUnit, unitSide)
-    if (GetUnitCurrentOrder(whichUnit) == 0) then
+    if GetUnitCurrentOrder(whichUnit) == 0 then
         local targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
         if targetUnit ~= nil then
             IssuePointOrder(whichUnit, "attack", GetUnitX(targetUnit), GetUnitY(targetUnit))
@@ -4565,6 +4537,12 @@ function BattleUnitSpellsBehaviorAction()
                             RecycleGuardPosition(unit)
                             PauseTimer(timer)
                             DestroyTimer(timer)
+                        elseif GetUnitCurrentOrder(unit) == 0 then
+                            if not UnitAlive(targetUnit) then
+                                targetUnit = GroupPickRandomUnit(sideGroups[unitSide == SPAWN_LEFT and SPAWN_RIGHT or SPAWN_LEFT])
+                            end
+                            RemoveGuardPosition(unit)
+                            IssueTargetOrder(unit, "attack", targetUnit)
                         end
                     end)
                 end
@@ -4640,8 +4618,8 @@ OnInit.map(function()
     BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
     SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_VISION, true)
-    SetPlayerHandicap(Player(1), 0.05)
-    SetPlayerHandicap(Player(2), 0.05)
+    --SetPlayerHandicap(Player(1), 0.05)
+    --SetPlayerHandicap(Player(2), 0.05)
     --SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_CONTROL, true)
     --SetPlayerAlliance(Player(2), Player(0), ALLIANCE_SHARED_CONTROL, true)
 
@@ -4892,7 +4870,7 @@ end
 
 function config()
 SetMapName("TRIGSTR_001")
-SetMapDescription("")
+SetMapDescription("TRIGSTR_008")
 SetPlayers(3)
 SetTeams(3)
 SetGamePlacement(MAP_PLACEMENT_USE_MAP_SETTINGS)
