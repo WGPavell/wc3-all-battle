@@ -34,11 +34,11 @@ sideHelperUnits = {}
 
 leftSideSpawnData = {
     raceIndex = 1,
-    unitIndex = 1
+    unitIndex = 6
 }
 rightSideSpawnData = {
-    raceIndex = 1,
-    unitIndex = 1
+    raceIndex = 2,
+    unitIndex = 3
 }
 
 sideFrames = nil
@@ -225,7 +225,8 @@ function PrepareNewBattle()
 --        debugPrint("Right side name " .. rightUnitData.name)
         local leftCanAttackRight = ((leftUnitData.attack_target.ground and rightUnitData.unit_target.ground) or (leftUnitData.attack_target.air and rightUnitData.unit_target.air)) and not (leftUnitData.attack_target.magic and rightUnitData.unit_target.immune)
 --        debugPrint(leftCanAttackRight and "Left can attack right" or "Left can't attack right")
-        local rightCanAttackLeft = (rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air) and not (rightUnitData.attack_target.magic and leftUnitData.unit_target.immune)
+        local rightCanAttackLeft = ((rightUnitData.attack_target.ground and leftUnitData.unit_target.ground) or (rightUnitData.attack_target.air and leftUnitData.unit_target.air)) and not (rightUnitData.attack_target.magic and leftUnitData.unit_target.immune)
+        --debugPrintAny(leftCanAttackRight)
 --        debugPrint(rightCanAttackLeft and "Right can attack left" or "Right can't attack left")
     until leftCanAttackRight and rightCanAttackLeft and leftUnitData.is_hero == rightUnitData.is_hero
 
@@ -497,8 +498,8 @@ OnInit.map(function()
     SetCameraPosition(0, 0)
     SetTimeOfDay(12)
     SuspendTimeOfDay(true)
-    EndThematicMusic()
-    ClearMapMusic()
+    --EndThematicMusic()
+    --ClearMapMusic()
     VolumeGroupSetVolume(SOUND_VOLUMEGROUP_AMBIENTSOUNDS, 0)
     BlzEnableCursor(isCursorEnabled)
     SetPlayerAlliance(Player(1), Player(0), ALLIANCE_SHARED_VISION, true)
@@ -679,7 +680,7 @@ OnInit.final(function()
                 frame:setVisible(false)
             end
         end
-        DelayCallback(1.25, function()
+        DelayCallback(1, function()
             for index, side in ipairs(sideFrames) do
                 side.icon.cover:animateFadeIn(0.75)
                 side.text:animateFadeIn(0.75)
